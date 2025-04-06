@@ -23,8 +23,8 @@ def get_rated_films(username):
         'liked': [],
         'rating': [],
         'avg_rating': [],
-        'num_members': [],
-        'percent_liked': [],
+        'num_watched': [],
+        'num_liked': [],
         'year': [],
         'runtime': [],
         'genres': [],
@@ -59,11 +59,11 @@ def get_rated_films(username):
             films['title'].append(title)
             films['liked'].append(liked)
             films['rating'].append(star_to_rating[rating])
-            films['avg_rating'].append(film_details.get('avg_rating'))
-            films['num_members'].append(film_details.get('num_members'))
-            films['percent_liked'].append(film_details.get('percent_liked'))
+            films['avg_rating'].append(film_details['avg_rating'])
+            films['num_watched'].append(film_details['num_watched'])
+            films['num_liked'].append(film_details['num_liked'])
             films['year'].append(film_details['year'])
-            films['runtime'].append(film_details.get('runtime'))
+            films['runtime'].append(film_details['runtime'])
             films['genres'].append(film_details['genres'])
             films['themes'].append(film_details['themes'])
             films['director'].append(film_details['director'])
@@ -76,6 +76,9 @@ def get_rated_films(username):
     return pd.DataFrame(films)
 
 def get_film_details(film_slug):
+    def get_digits(text):
+        return ''.join(filter(str.isdigit, text))
+    
     film_url = f"https://letterboxd.com/film/{film_slug}/"
     response = requests.get(film_url)
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -83,8 +86,11 @@ def get_film_details(film_slug):
     details = {}
     
     # get release year
-    year = soup.find('a', href=lambda x: x and '/year/' in x)
-    details['year'] = year.text.strip() if year else None
+    details['year'] = soup.find('a', href=lambda x: x and '/year/' in x).text.strip()
+    
+    # get runtime
+    runtime = soup.find('p', class_='text-link text-footer')
+    details['runtime'] = int(get_digits(runtime.get_text(strip=True)))
     
     # get genres
     genres = []
@@ -101,8 +107,7 @@ def get_film_details(film_slug):
     details['themes'] = themes
     
     # get director
-    director = soup.find('a', href=lambda x: x and '/director/' in x)
-    details['director'] = director.text if director else None
+    details['director'] = soup.find('a', href=lambda x: x and '/director/' in x).text
     
     # get cast
     actors = []
@@ -111,5 +116,24 @@ def get_film_details(film_slug):
         actors = [a.text for a in actor_div.find_all('a', href=lambda x: x and '/actor/' in x in x)]    
     details['cast'] = actors
     
+    # get community stats
+    ratings_url = f"https://letterboxd.com/csi/film/{film_slug}/rating-histogram/"
+    ratings = BeautifulSoup(requests.get(ratings_url).text, 'html.parser')
+    rating = ratings.find('a', class_='display-rating')['title']
+    details['avg_rating'] = float(rating.split("Weighted average of ")[1].split(" based")[0])
+    
+    film_stats_url = f"https://letterboxd.com/csi/film/{film_slug}/stats/"
+    film_stats = BeautifulSoup(requests.get(film_stats_url).text, 'html.parser')
+            
+    # number of members watched
+    watched_stat = film_stats.find('a', class_='icon-watched')
+    details['num_watched'] = int(get_digits(watched_stat['title']))
+    
+    # number of members liked
+    liked_stat = film_stats.find('a', class_='icon-liked')
+    details['num_liked'] = int(get_digits(liked_stat['title']))
+    
     return details
 
+films = get_rated_films('rubylu')
+print(films)
