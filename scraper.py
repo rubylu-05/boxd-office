@@ -68,6 +68,13 @@ def get_film_details(film_slug):
         genres = [a.text for a in genre_div.find_all('a', href=lambda x: x and '/films/genre/' in x)]
     details['genres'] = genres
     
+    # get themes
+    themes = []
+    theme_div = soup.find('div', id='tab-genres')
+    if theme_div:
+        themes = [a.text for a in theme_div.find_all('a', href=lambda x: x and ('/films/theme/' in x or 'films/mini-theme/' in x))]    
+    details['themes'] = themes
+    
     # get director
     director = soup.find('a', href=lambda x: x and '/director/' in x)
     details['director'] = director.text if director else None
