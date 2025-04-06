@@ -12,12 +12,26 @@ star_to_rating = {
     "★½": 1.5,
     "★★½": 2.5,
     "★★★½": 3.5,
-    "★★★★½": 4.5
+    "★★★★½": 4.5,
+    None: None
 }
 
 def get_rated_films(username):
     base_url = f"https://letterboxd.com/{username}/films/"
-    films = []
+    films = {
+        'title': [],
+        'liked': [],
+        'rating': [],
+        'avg_rating': [],
+        'num_members': [],
+        'percent_liked': [],
+        'year': [],
+        'runtime': [],
+        'genres': [],
+        'themes': [],
+        'director': [],
+        'cast': [],
+    }
     
     page = 1
     while True:
@@ -39,13 +53,24 @@ def get_rated_films(username):
             film_url = film.find('div')['data-film-slug']
             rating = film.find('span', class_='rating')
             rating = rating.text.strip() if rating else None
+            liked = bool(film.find('span', class_='like'))
+            film_details = get_film_details(film_url)
             
-            films.append({
-                'title': title,
-                'film_url': film_url,
-                'rating': star_to_rating[rating]
-            })
-        
+            films['title'].append(title)
+            films['liked'].append(liked)
+            films['rating'].append(star_to_rating[rating])
+            films['avg_rating'].append(film_details.get('avg_rating'))
+            films['num_members'].append(film_details.get('num_members'))
+            films['percent_liked'].append(film_details.get('percent_liked'))
+            films['year'].append(film_details['year'])
+            films['runtime'].append(film_details.get('runtime'))
+            films['genres'].append(film_details['genres'])
+            films['themes'].append(film_details['themes'])
+            films['director'].append(film_details['director'])
+            films['cast'].append(film_details['cast'])
+            
+            print(film_url)
+                
         page += 1
     
     return pd.DataFrame(films)
@@ -79,7 +104,12 @@ def get_film_details(film_slug):
     director = soup.find('a', href=lambda x: x and '/director/' in x)
     details['director'] = director.text if director else None
     
+    # get cast
+    actors = []
+    actor_div = soup.find('div', id='tab-cast')
+    if actor_div:
+        actors = [a.text for a in actor_div.find_all('a', href=lambda x: x and '/actor/' in x in x)]    
+    details['cast'] = actors
+    
     return details
 
-films_df = get_rated_films('rubylu')
-# print(films_df)
