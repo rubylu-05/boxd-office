@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 star_to_rating = {
     "★": 1,
@@ -16,125 +17,145 @@ star_to_rating = {
     None: None
 }
 
-def get_films(username):
-    base_url = f"https://letterboxd.com/{username}/films/by/date-earliest/"
-    films = {
-        'title': [],
-        'liked': [],
-        'rating': [],
-        'avg_rating': [],
-        'num_watched': [],
-        'num_liked': [],
-        'year': [],
-        'runtime': [],
+def get_film_details(film_slug):
+    def get_digits(text):
+        return int(''.join(filter(str.isdigit, text)) or 0)
+    
+    details = {
+        'avg_rating': None,
+        'num_watched': None,
+        'num_liked': None,
+        'year': None,
+        'runtime': None,
         'genres': [],
         'themes': [],
-        'director': [],
-        'cast': [],
+        'director': None,
+        'cast': []
     }
-    
+
+    try:
+        film_url = f"https://letterboxd.com/film/{film_slug}/"
+        response = requests.get(film_url, timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # get release year
+        year_tag = soup.find('a', href=lambda x: x and '/year/' in x)
+        if year_tag:
+            details['year'] = year_tag.text.strip()
+        
+        # get runtime
+        runtime = soup.find('p', class_='text-link text-footer')
+        if runtime:
+            details['runtime'] = get_digits(runtime.get_text(strip=True))
+        
+        # get genres and themes
+        genre_div = soup.find('div', id='tab-genres')
+        if genre_div:
+            genres = genre_div.find_all('a')
+            for a in genres:
+                href = a.get('href', '')
+                if '/films/genre/' in href:
+                    details['genres'].append(a.text)
+                elif '/films/theme/' in href or '/films/mini-theme/' in href:
+                    details['themes'].append(a.text)
+        
+        # get director
+        director_tag = soup.find('a', href=lambda x: x and '/director/' in x)
+        if director_tag:
+            details['director'] = director_tag.text
+        
+        # get cast
+        actor_div = soup.find('div', id='tab-cast')
+        if actor_div:
+            details['cast'] = [a.text for a in actor_div.find_all('a', href=lambda x: x and '/actor/' in x)]
+
+        # get average rating
+        ratings_url = f"https://letterboxd.com/csi/film/{film_slug}/rating-histogram/"
+        ratings_html = requests.get(ratings_url, timeout=10).text
+        rating = BeautifulSoup(ratings_html, 'html.parser').find('a', class_='display-rating')
+        if rating:
+            details['avg_rating'] = float(rating['title'].split("Weighted average of ")[1].split(" based")[0])
+        
+        # get stats (watched, liked)
+        stats_url = f"https://letterboxd.com/csi/film/{film_slug}/stats/"
+        stats_html = requests.get(stats_url, timeout=10).text
+        stats_soup = BeautifulSoup(stats_html, 'html.parser')
+        
+        watched_stat = stats_soup.find('a', class_='icon-watched')
+        if watched_stat:
+            details['num_watched'] = get_digits(watched_stat['title'])
+        
+        liked_stat = stats_soup.find('a', class_='icon-liked')
+        if liked_stat:
+            details['num_liked'] = get_digits(liked_stat['title'])
+
+    except Exception as e:
+        print(f"[ERROR] failed to fetch details for {film_slug}: {e}")
+
+    return film_slug, details
+
+
+def get_films(username, max_threads=10, max_pages=None):
+    base_url = f"https://letterboxd.com/{username}/films/by/date-earliest/"
+    films = []
+    film_slug_to_film = {}
     page = 1
+
     while True:
         url = f"{base_url}page/{page}/" if page > 1 else base_url
         response = requests.get(url)
-        
+
         if response.status_code != 200:
             break
-            
+
         soup = BeautifulSoup(response.text, 'html.parser')
         film_list = soup.find_all('li', class_='poster-container')
-        
         if not film_list:
             break
-        
-        # get ratings
+
         for film in film_list:
             title = film.find('img')['alt']
-            film_url = film.find('div')['data-film-slug']
+            film_slug = film.find('div')['data-film-slug']
             rating = film.find('span', class_='rating')
             rating = rating.text.strip() if rating else None
             liked = bool(film.find('span', class_='like'))
-            film_details = get_film_details(film_url)
-            
-            films['title'].append(title)
-            films['liked'].append(liked)
-            films['rating'].append(star_to_rating[rating])
-            films['avg_rating'].append(film_details['avg_rating'])
-            films['num_watched'].append(film_details['num_watched'])
-            films['num_liked'].append(film_details['num_liked'])
-            films['year'].append(film_details['year'])
-            films['runtime'].append(film_details['runtime'])
-            films['genres'].append(film_details['genres'])
-            films['themes'].append(film_details['themes'])
-            films['director'].append(film_details['director'])
-            films['cast'].append(film_details['cast'])
-            
-            print(film_url)
-                
+
+            film_data = {
+                'title': title,
+                'liked': liked,
+                'rating': star_to_rating.get(rating, None),
+                'film_slug': film_slug
+            }
+            films.append(film_data)
+            film_slug_to_film[film_slug] = film_data
         page += 1
-    
-    return pd.DataFrame(films)
+        if max_pages and page > max_pages:
+            break
 
-def get_film_details(film_slug):
-    def get_digits(text):
-        return ''.join(filter(str.isdigit, text))
-    
-    film_url = f"https://letterboxd.com/film/{film_slug}/"
-    response = requests.get(film_url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    details = {}
-    
-    # get release year
-    details['year'] = soup.find('a', href=lambda x: x and '/year/' in x).text.strip()
-    
-    # get runtime
-    runtime = soup.find('p', class_='text-link text-footer')
-    details['runtime'] = int(get_digits(runtime.get_text(strip=True)))
-    
-    # get genres
-    genres = []
-    genre_div = soup.find('div', id='tab-genres')
-    if genre_div:
-        genres = [a.text for a in genre_div.find_all('a', href=lambda x: x and '/films/genre/' in x)]
-    details['genres'] = genres
-    
-    # get themes
-    themes = []
-    theme_div = soup.find('div', id='tab-genres')
-    if theme_div:
-        themes = [a.text for a in theme_div.find_all('a', href=lambda x: x and ('/films/theme/' in x or 'films/mini-theme/' in x))]    
-    details['themes'] = themes
-    
-    # get director
-    details['director'] = soup.find('a', href=lambda x: x and '/director/' in x).text
-    
-    # get cast
-    actors = []
-    actor_div = soup.find('div', id='tab-cast')
-    if actor_div:
-        actors = [a.text for a in actor_div.find_all('a', href=lambda x: x and '/actor/' in x in x)]    
-    details['cast'] = actors
-    
-    # get community stats
-    ratings_url = f"https://letterboxd.com/csi/film/{film_slug}/rating-histogram/"
-    ratings = BeautifulSoup(requests.get(ratings_url).text, 'html.parser')
-    rating = ratings.find('a', class_='display-rating')['title']
-    details['avg_rating'] = float(rating.split("Weighted average of ")[1].split(" based")[0])
-    
-    film_stats_url = f"https://letterboxd.com/csi/film/{film_slug}/stats/"
-    film_stats = BeautifulSoup(requests.get(film_stats_url).text, 'html.parser')
-            
-    # number of members watched
-    watched_stat = film_stats.find('a', class_='icon-watched')
-    details['num_watched'] = int(get_digits(watched_stat['title']))
-    
-    # number of members liked
-    liked_stat = film_stats.find('a', class_='icon-liked')
-    details['num_liked'] = int(get_digits(liked_stat['title']))
-    
-    return details
+    print(f"found {len(films)} films. fetching details...")
 
-films_df = get_films('rubylu')
-print(films_df)
+    film_details_map = {}
+
+    with ThreadPoolExecutor(max_workers=max_threads) as executor:
+        futures = {executor.submit(get_film_details, film['film_slug']): film['film_slug'] for film in films}
+        for future in as_completed(futures):
+            slug, details = future.result()
+            film_details_map[slug] = details
+            print(f"fetched details for: {film_slug_to_film[slug]['title']}")
+
+    # preserve original order
+    final_data = []
+    for film in films:
+        slug = film['film_slug']
+        details = film_details_map.get(slug, {})
+        film.update(details)
+        film.pop('film_slug', None)
+        final_data.append(film)
+
+    return pd.DataFrame(final_data)
+
+
+print("scraping films...")
+films_df = get_films('rubylu', max_threads=20, max_pages=None)
+print("scrape complete!")
 films_df.to_csv('rubylu.csv', index=False)
