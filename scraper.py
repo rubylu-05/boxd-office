@@ -16,8 +16,8 @@ star_to_rating = {
     None: None
 }
 
-def get_rated_films(username):
-    base_url = f"https://letterboxd.com/{username}/films/"
+def get_films(username):
+    base_url = f"https://letterboxd.com/{username}/films/by/date-earliest/"
     films = {
         'title': [],
         'liked': [],
@@ -135,5 +135,6 @@ def get_film_details(film_slug):
     
     return details
 
-films = get_rated_films('rubylu')
-print(films)
+films_df = get_films('rubylu')
+print(films_df)
+films_df.to_csv('rubylu.csv', index=False)
