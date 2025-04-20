@@ -17,10 +17,10 @@ star_to_rating = {
     None: None
 }
 
+def get_digits(text):
+    return int(''.join(filter(str.isdigit, text))) or 0
+
 def get_film_details(film_slug):
-    def get_digits(text):
-        return int(''.join(filter(str.isdigit, text)) or 0)
-    
     details = {
         'avg_rating': None,
         'num_watched': None,
@@ -69,14 +69,13 @@ def get_film_details(film_slug):
         if actor_div:
             details['cast'] = [a.text for a in actor_div.find_all('a', href=lambda x: x and '/actor/' in x)]
 
-        # get average rating
+        # get community stats
         ratings_url = f"https://letterboxd.com/csi/film/{film_slug}/rating-histogram/"
         ratings_html = requests.get(ratings_url, timeout=10).text
         rating = BeautifulSoup(ratings_html, 'html.parser').find('a', class_='display-rating')
         if rating:
             details['avg_rating'] = float(rating['title'].split("Weighted average of ")[1].split(" based")[0])
         
-        # get stats (watched, liked)
         stats_url = f"https://letterboxd.com/csi/film/{film_slug}/stats/"
         stats_html = requests.get(stats_url, timeout=10).text
         stats_soup = BeautifulSoup(stats_html, 'html.parser')
@@ -93,7 +92,6 @@ def get_film_details(film_slug):
         print(f"[ERROR] failed to fetch details for {film_slug}: {e}")
 
     return film_slug, details
-
 
 def get_films(username, max_threads=10, max_pages=None):
     base_url = f"https://letterboxd.com/{username}/films/by/date-earliest/"
@@ -132,7 +130,7 @@ def get_films(username, max_threads=10, max_pages=None):
         if max_pages and page > max_pages:
             break
 
-    print(f"found {len(films)} films. fetching details...")
+    print(f"Found {len(films)} films. Fetching details...")
 
     film_details_map = {}
 
@@ -141,7 +139,7 @@ def get_films(username, max_threads=10, max_pages=None):
         for future in as_completed(futures):
             slug, details = future.result()
             film_details_map[slug] = details
-            print(f"fetched details for: {film_slug_to_film[slug]['title']}")
+            print(f"Fetched details for: {film_slug_to_film[slug]['title']}")
 
     # preserve original order
     final_data = []
@@ -154,8 +152,22 @@ def get_films(username, max_threads=10, max_pages=None):
 
     return pd.DataFrame(final_data)
 
+def save_to_csv(username, filename=None, max_threads=10, max_pages=None):
+    if not filename:
+        filename = f"{username}.csv"
+    print(f"Scraping films for {username}...")
+    films_df = get_films(username, max_threads=max_threads, max_pages=max_pages)
+    print("Scrape complete!")
+    films_df.to_csv(filename, index=False)
+    return films_df
 
-print("scraping films...")
-films_df = get_films('rubylu', max_threads=20, max_pages=None)
-print("scrape complete!")
-films_df.to_csv('rubylu.csv', index=False)
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('username', help='Letterboxd username to scrape')
+    parser.add_argument('--output', help='Output CSV filename', default=None)
+    parser.add_argument('--threads', type=int, help='Max threads to use', default=10)
+    parser.add_argument('--pages', type=int, help='Max pages to scrape', default=None)
+    args = parser.parse_args()
+    
+    save_to_csv(args.username, args.output, args.threads, args.pages)
