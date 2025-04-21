@@ -1,22 +1,28 @@
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from theme import BLUE, GRAY
 
 def plot_popular_genres(films_df: pd.DataFrame):
-    exploded_genres = films_df.explode('genres')
+    exploded = films_df.explode('genres')
+    exploded = exploded.dropna(subset=['genres'])
 
-    genre_counts = exploded_genres['genres'].value_counts().reset_index()
-    genre_counts.columns = ['genre', 'count']
+    genre_counts = exploded.groupby('genres').size().reset_index(name='total')
+    liked_counts = exploded[exploded['liked']].groupby('genres').size().reset_index(name='liked')
+    genre_data = pd.merge(genre_counts, liked_counts, on='genres', how='left').fillna(0)
+    genre_data['liked'] = genre_data['liked'].astype(int)
+    genre_data['unliked'] = genre_data['total'] - genre_data['liked']
 
-    genre_examples = exploded_genres.groupby('genres').apply(
+    genre_data.rename(columns={'genres': 'genre'}, inplace=True)
+
+    genre_examples = exploded.groupby('genres').apply(
         lambda x: x.nlargest(3, 'num_watched')['title'].tolist()
     )
-
-    genre_favourites = exploded_genres.dropna(subset=['rating']).groupby('genres').apply(
+    genre_favourites = exploded.dropna(subset=['rating']).groupby('genres').apply(
         lambda x: x.sort_values('rating', ascending=False).head(3)['title'].tolist()
     )
 
-    genre_data = genre_counts.merge(
+    genre_data = genre_data.merge(
         genre_examples.rename('examples'),
         left_on='genre',
         right_index=True
@@ -29,7 +35,9 @@ def plot_popular_genres(films_df: pd.DataFrame):
 
     genre_data['hover_text'] = genre_data.apply(
         lambda row: (
-            f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {row['count']}<br>" +
+            f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {row['total']}<br>" +
+            f"<span style='color:{BLUE}'><b>Liked:</b></span> {row['liked']} "
+            f"({round(100 * row['liked'] / row['total'])}%)<br>" +
             f"<span style='color:{BLUE}'><b>Examples:</b></span> {', '.join(row['examples'])}<br>" +
             (
                 f"<span style='color:{BLUE}'><b>Your Favourites:</b></span> {', '.join(row['favourites'])}"
@@ -39,62 +47,55 @@ def plot_popular_genres(films_df: pd.DataFrame):
         axis=1
     )
 
-    fig = px.bar(
-        genre_data,
-        y='genre',
-        x='count',
-        title='Most Watched Genres',
-        custom_data=['hover_text'],
-        labels={'count': 'Number of Films', 'genre': 'Genre'},
-        color='count',
-        color_continuous_scale=[(0, 'white'), (1, BLUE)],
-        orientation='h'
-    )
+    genre_data = genre_data.sort_values('total', ascending=True)
 
-    fig.update_traces(
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        y=genre_data['genre'],
+        x=genre_data['unliked'],
+        name='Not Liked',
+        orientation='h',
+        marker_color='white',
+        customdata=genre_data[['hover_text']],
         hovertemplate="%{customdata[0]}<extra></extra>"
-    )
+    ))
+
+    fig.add_trace(go.Bar(
+        y=genre_data['genre'],
+        x=genre_data['liked'],
+        name='Liked',
+        orientation='h',
+        marker_color=BLUE,
+        customdata=genre_data[['hover_text']],
+        hovertemplate="%{customdata[0]}<extra></extra>"
+    ))
 
     fig.update_layout(
+        barmode='stack',
         title={
             'text': "Most Watched Genres",
-            'font': {
-                'size': 26,
-                'color': BLUE,
-            },
+            'font': {'size': 26, 'color': BLUE},
             'x': 0.0,
-            'xanchor': 'left',
+            'xanchor': 'left'
         },
         hoverlabel=dict(
             bgcolor=GRAY,
             font_size=13,
             font_color='white',
-            align='left',
+            align='left'
         ),
         xaxis=dict(
             title='Number of Films',
-            title_font=dict(
-                size=16,
-                weight='bold'
-            )
+            title_font=dict(size=16, weight='bold'),
         ),
         yaxis=dict(
             title='Genre',
-            title_font=dict(
-                size=16,
-                weight='bold'
-            ),
-            categoryorder='total ascending'
+            title_font=dict(size=16, weight='bold'),
         ),
         height=600,
-        showlegend=False,
-        margin=dict(t=80),
-        coloraxis_showscale=False
-    )
-
-    fig.update_coloraxes(
-        cmin=genre_data['count'].min(),
-        cmax=genre_data['count'].max()
+        showlegend=True,
+        margin=dict(t=80)
     )
 
     return fig
