@@ -1,29 +1,31 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import ORANGE, GRAY
+from theme import BLUE, GRAY
 
-def plot_theme_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
-    exploded = films_df.explode('themes')
-    exploded = exploded.dropna(subset=['themes', 'rating'])
+def plot_decades_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
+    films_df['decade'] = (films_df['year'] // 10) * 10
 
-    theme_counts = exploded['themes'].value_counts()
-    top_themes = theme_counts.head(top_n).index if len(theme_counts) > top_n else theme_counts.index
-
-    filtered = exploded[exploded['themes'].isin(top_themes)]
+    # drop any rows with missing rating or decade
+    filtered = films_df.dropna(subset=['decade', 'rating'])
 
     avg_ratings = (
-        filtered.groupby('themes')['rating']
+        filtered.groupby('decade')['rating']
         .mean()
-        .reindex(top_themes)
+        .sort_index(ascending=False)
     )
 
     film_counts = (
-        filtered.groupby('themes')['rating']
+        filtered.groupby('decade')['rating']
         .count()
-        .reindex(top_themes)
+        .reindex(avg_ratings.index)
     )
 
-    categories = avg_ratings.index.tolist()
+    top_decades = avg_ratings.head(top_n).index if len(avg_ratings) > top_n else avg_ratings.index
+
+    avg_ratings = avg_ratings.loc[top_decades]
+    film_counts = film_counts.loc[top_decades]
+
+    categories = [f"{decade}s" for decade in avg_ratings.index.tolist()]
     values = avg_ratings.tolist()
     counts = film_counts.tolist()
 
@@ -38,18 +40,18 @@ def plot_theme_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
         theta=categories,
         fill='toself',
         name='Average Rating',
-        line=dict(color=ORANGE),
+        line=dict(color=BLUE),
         marker=dict(size=6),
         customdata=[[cat, val, cnt] for cat, val, cnt in zip(categories, values, counts)],
-        hovertemplate="<span style='color:" + ORANGE + "'><b>Theme:</b></span> %{customdata[0]}<br>" +
-                      "<span style='color:" + ORANGE + "'><b>Average Rating:</b></span> %{customdata[1]:.2f}<br>" +
-                      "<span style='color:" + ORANGE + "'><b>Number of Films:</b></span> %{customdata[2]}<extra></extra>"
+        hovertemplate="<span style='color:" + BLUE + "'><b>Decade:</b></span> %{customdata[0]}<br>" +
+                      "<span style='color:" + BLUE + "'><b>Average Rating:</b></span> %{customdata[1]:.2f}<br>" +
+                      "<span style='color:" + BLUE + "'><b>Number of Films:</b></span> %{customdata[2]}<extra></extra>"
     ))
 
     fig.update_layout(
         title={
-            'text': "Average Ratings by Theme",
-            'font': {'size': 26, 'color': ORANGE},
+            'text': "Average Ratings by Decade",
+            'font': {'size': 26, 'color': BLUE},
             'x': 0.0,
             'xanchor': 'left'
         },
@@ -80,4 +82,3 @@ def plot_theme_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
     )
 
     return fig
-    

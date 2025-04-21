@@ -49,7 +49,7 @@ def plot_genre_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
 
     fig.update_layout(
         title={
-            'text': "Your Average Rating by Genre",
+            'text': "Average Ratings by Genre",
             'font': {'size': 26, 'color': BLUE},
             'x': 0.0,
             'xanchor': 'left'

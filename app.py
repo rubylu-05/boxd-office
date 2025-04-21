@@ -6,6 +6,7 @@ from visualizations.genres.genre_radar import plot_genre_rating_radar
 from visualizations.genres.popular_themes import plot_popular_themes
 from visualizations.genres.theme_radar import plot_theme_rating_radar
 from visualizations.decades.popular_decades import plot_popular_decades
+from visualizations.decades.decade_radar import plot_decades_rating_radar
 from visualizations.decades.year_ratings import plot_yearly_average_ratings
 from theme import ORANGE, GREEN, BLUE
 
@@ -53,6 +54,7 @@ def main():
                 st.plotly_chart(plot_theme_rating_radar(films_df), use_container_width=True)
                 st.markdown(f"<h2 style='color: {GREEN};'>Decades</h2>", unsafe_allow_html=True)
                 st.plotly_chart(plot_popular_decades(films_df), use_container_width=True)
+                st.plotly_chart(plot_decades_rating_radar(films_df), use_container_width=True)
                 st.plotly_chart(plot_yearly_average_ratings(films_df), use_continer_width=True)
 
             except Exception as e:
