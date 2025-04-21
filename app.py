@@ -5,6 +5,7 @@ from visualizations.genres.popular_genres import plot_popular_genres
 from visualizations.genres.genre_radar import plot_genre_rating_radar
 from visualizations.genres.popular_themes import plot_popular_themes
 from visualizations.genres.theme_radar import plot_theme_rating_radar
+from visualizations.decades.popular_decades import plot_popular_decades
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -12,7 +13,7 @@ warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 st.set_page_config(page_title="Boxd Office", page_icon="🍿")
 
 def main():
-    st.markdown(f"<h1 style='font-size: 4em;'><span style='color: {ORANGE};'>Boxd</span> · <span style='color: {GREEN};'>Office</span></h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='font-size: 4em;'><span style='color: {ORANGE};'>Boxd</span>·<span style='color: {GREEN};'>Office</span></h1>", unsafe_allow_html=True)
     st.write("Visualize your Letterboxd film data!")
 
     with st.form("user_input"):
@@ -49,6 +50,8 @@ def main():
                 st.plotly_chart(plot_genre_rating_radar(films_df), use_container_width=True)
                 st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
                 st.plotly_chart(plot_theme_rating_radar(films_df), use_container_width=True)
+                st.markdown(f"<h2 style='color: {GREEN};'>Decades</h2>", unsafe_allow_html=True)
+                st.plotly_chart(plot_popular_decades(films_df), use_container_width=True)
 
             except Exception as e:
                 st.error(f"An error occurred: {e}")
