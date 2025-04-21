@@ -1,52 +1,56 @@
 import pandas as pd
 import plotly.express as px
-from theme import BLUE, GRAY
+from theme import ORANGE, GRAY
 
-def plot_popular_genres(films_df: pd.DataFrame):
-    exploded_genres = films_df.explode('genres')
-    
-    genre_counts = exploded_genres['genres'].value_counts().reset_index()
-    genre_counts.columns = ['genre', 'count']
-    
-    genre_examples = exploded_genres.groupby('genres').apply(
+def plot_popular_themes(films_df: pd.DataFrame):
+    exploded_themes = films_df.explode('themes')
+
+    theme_counts = exploded_themes['themes'].value_counts().reset_index()
+    theme_counts.columns = ['theme', 'count']
+
+    # top 20 themes
+    theme_counts = theme_counts.head(20)
+
+    # examples for top themes
+    theme_examples = exploded_themes.groupby('themes').apply(
         lambda x: x.nlargest(3, 'num_watched')['title'].tolist()
     )
-    
-    genre_data = genre_counts.merge(
-        genre_examples.rename('examples'), 
-        left_on='genre', 
+
+    theme_data = theme_counts.merge(
+        theme_examples.rename('examples'), 
+        left_on='theme', 
         right_index=True
     )
-    
-    genre_data['hover_text'] = genre_data.apply(
-        lambda row: f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {row['count']}<br>" +
-                    f"<span style='color:{BLUE}'><b>Examples:</b></span> {', '.join(row['examples'])}",
+
+    theme_data['hover_text'] = theme_data.apply(
+        lambda row: f"<span style='color:{ORANGE}'><b>Number of Films:</b></span> {row['count']}<br>" +
+                    f"<span style='color:{ORANGE}'><b>Examples:</b></span> {', '.join(row['examples'])}",
         axis=1
     )
-    
+
     # Create the figure with explicit color scale
     fig = px.bar(
-        genre_data,
-        y='genre',
+        theme_data,
+        y='theme',
         x='count',
-        title='Most Watched Genres',
+        title='Most Watched Themes',
         custom_data=['hover_text'],
-        labels={'count': 'Number of Films', 'genre': 'Genre'},
+        labels={'count': 'Number of Films', 'theme': 'Theme'},
         color='count',
-        color_continuous_scale=[(0, 'white'), (1, BLUE)],
+        color_continuous_scale=[(0, 'white'), (1, ORANGE)],
         orientation='h'
     )
-    
+
     fig.update_traces(
         hovertemplate="%{customdata[0]}<extra></extra>"
     )
-    
+
     fig.update_layout(
         title={
-            'text': "Most Watched Genres",
+            'text': "Most Watched Themes",
             'font': {
                 'size': 26,
-                'color': BLUE,
+                'color': ORANGE,
             },
             'x': 0.0,
             'xanchor': 'left',
@@ -65,7 +69,7 @@ def plot_popular_genres(films_df: pd.DataFrame):
             )
         ),
         yaxis=dict(
-            title='Genre',
+            title='Theme',
             title_font=dict(
                 size=16,
                 weight='bold'
@@ -77,10 +81,10 @@ def plot_popular_genres(films_df: pd.DataFrame):
         margin=dict(t=80),
         coloraxis_showscale=False
     )
-    
+
     fig.update_coloraxes(
-        cmin=genre_data['count'].min(),
-        cmax=genre_data['count'].max()
+        cmin=theme_data['count'].min(),
+        cmax=theme_data['count'].max()
     )
-    
+
     return fig

@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import warnings
 from visualizations.genres.popular_genres import plot_popular_genres
+from visualizations.genres.popular_themes import plot_popular_themes
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -43,6 +44,7 @@ def main():
 
                 st.markdown(f"<h2 style='color: {GREEN};'>Genres and Themes</h2>", unsafe_allow_html=True)
                 st.plotly_chart(plot_popular_genres(films_df), use_container_width=True)
+                st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
 
             except Exception as e:
                 st.error(f"An error occurred: {e}")
