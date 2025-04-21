@@ -44,7 +44,7 @@ def plot_popular_decades(films_df: pd.DataFrame):
         axis=1
     )
 
-    # Sort by decade chronologically
+    # sort by decade chronologically
     decade_data['decade_numeric'] = decade_data['decade'].str[:-1].astype(int)
     decade_data = decade_data.sort_values('decade_numeric')
 
