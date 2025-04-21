@@ -1,5 +1,6 @@
 import pandas as pd
 import plotly.express as px
+from theme import BLUE, GRAY
 
 def plot_popular_genres(films_df: pd.DataFrame) -> None:
     exploded_genres = films_df.explode('genres')
@@ -7,7 +8,6 @@ def plot_popular_genres(films_df: pd.DataFrame) -> None:
     genre_counts = exploded_genres['genres'].value_counts().reset_index()
     genre_counts.columns = ['genre', 'count']
     
-    # top 3 most watched films for each genre (by num_watched)
     genre_examples = exploded_genres.groupby('genres').apply(
         lambda x: x.nlargest(3, 'num_watched')['title'].tolist()
     )
@@ -19,9 +19,9 @@ def plot_popular_genres(films_df: pd.DataFrame) -> None:
     )
     
     genre_data['hover_text'] = genre_data.apply(
-        lambda row: f"<b>Genre:</b> {row['genre']}<br>" +
-                    f"<b>Number of Films:</b> {row['count']}<br>" +
-                    f"<b>Examples:</b> {', '.join(row['examples'])}",
+        lambda row: f"<span style='color:{BLUE}'><b>Genre:</b></span> {row['genre']}<br>" +
+                    f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {row['count']}<br>" +
+                    f"<span style='color:{BLUE}'><b>Examples:</b></span> {', '.join(row['examples'])}",
         axis=1
     )
     
@@ -43,13 +43,39 @@ def plot_popular_genres(films_df: pd.DataFrame) -> None:
     )
     
     fig.update_layout(
+        title={
+            'text': "Most Watched Genres",
+            'font': {
+                'size': 26,
+                'color': BLUE,
+            },
+            'x': 0.0,
+            'xanchor': 'left',
+        },
         hoverlabel=dict(
-            bgcolor="white",
-            font_size=12,
+            bgcolor=GRAY,
+            font_size=13,
+            font_color='white',
+            align='left',
         ),
-        yaxis={'categoryorder': 'total ascending'},
+        xaxis=dict(
+            title='Number of Films',
+            title_font=dict(
+                size=16,
+                weight='bold'
+            )
+        ),
+        yaxis=dict(
+            title='Number of Films',
+            title_font=dict(
+                size=16,
+                weight='bold'
+            ),
+            categoryorder='total ascending'
+        ),
         height=600,
-        showlegend=False
+        showlegend=False,
+        margin=dict(t=80)
     )
     
     return fig
