@@ -44,7 +44,7 @@ def plot_popular_decades(films_df: pd.DataFrame):
         axis=1
     )
 
-    # sort by decade chronologically
+    # Sort by decade chronologically
     decade_data['decade_numeric'] = decade_data['decade'].str[:-1].astype(int)
     decade_data = decade_data.sort_values('decade_numeric')
 
@@ -95,6 +95,12 @@ def plot_popular_decades(films_df: pd.DataFrame):
         height=600,
         showlegend=True,
         margin=dict(t=80)
+    )
+
+    fig.update_xaxes(
+        showgrid=True,
+        gridcolor='dark gray',
+        gridwidth=0.5
     )
 
     return fig

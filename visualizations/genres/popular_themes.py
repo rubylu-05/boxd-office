@@ -98,5 +98,11 @@ def plot_popular_themes(films_df: pd.DataFrame):
         showlegend=True,
         margin=dict(t=80)
     )
+    
+    fig.update_xaxes(
+        showgrid=True,
+        gridcolor='dark gray',
+        gridwidth=0.5
+    )
 
     return fig
