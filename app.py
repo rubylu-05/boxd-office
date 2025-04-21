@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import warnings
-from scraper import get_films
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 
@@ -20,11 +19,11 @@ def main():
             st.error("Please enter a valid Letterboxd username")
             return
             
-        with st.spinner("Scraping your films..."):
+        with st.spinner("Loading your films..."):
             try:
-                films_data = get_films(username, max_threads=20)
-                films_df = pd.DataFrame(films_data)
-                st.success("Scraping complete!")
+                # temporary CSV reading instead of scraping
+                films_df = pd.read_csv('rubylu.csv')
+                st.success("Data loaded successfully!")
                 
                 st.subheader("Your Film Data")
                 st.dataframe(films_df)
