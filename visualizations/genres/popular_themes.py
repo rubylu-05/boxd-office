@@ -16,19 +16,34 @@ def plot_popular_themes(films_df: pd.DataFrame):
         lambda x: x.nlargest(3, 'num_watched')['title'].tolist()
     )
 
+    # favourites for top themes
+    theme_favourites = exploded_themes.dropna(subset=['rating']).groupby('themes').apply(
+        lambda x: x.sort_values('rating', ascending=False).head(3)['title'].tolist()
+    )
+
     theme_data = theme_counts.merge(
         theme_examples.rename('examples'), 
         left_on='theme', 
         right_index=True
+    ).merge(
+        theme_favourites.rename('favourites'),
+        left_on='theme',
+        right_index=True,
+        how='left'
     )
 
     theme_data['hover_text'] = theme_data.apply(
-        lambda row: f"<span style='color:{ORANGE}'><b>Number of Films:</b></span> {row['count']}<br>" +
-                    f"<span style='color:{ORANGE}'><b>Examples:</b></span> {', '.join(row['examples'])}",
+        lambda row: (
+            f"<span style='color:{ORANGE}'><b>Number of Films:</b></span> {row['count']}<br>" +
+            f"<span style='color:{ORANGE}'><b>Examples:</b></span> {', '.join(row['examples'])}<br>" +
+            (
+                f"<span style='color:{ORANGE}'><b>Your Favourites:</b></span> {', '.join(row['favourites'])}"
+                if isinstance(row['favourites'], list) and row['favourites'] else ""
+            )
+        ),
         axis=1
     )
 
-    # Create the figure with explicit color scale
     fig = px.bar(
         theme_data,
         y='theme',
