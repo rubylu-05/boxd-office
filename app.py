@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import warnings
+from visualizations.genres.popular_genres import plot_popular_genres
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 
@@ -21,13 +22,15 @@ def main():
             
         with st.spinner("Loading your films..."):
             try:
-                # temporary CSV reading instead of scraping
                 films_df = pd.read_csv('rubylu.csv')
+                
+                for col in ['genres', 'themes', 'cast']:
+                    films_df[col] = films_df[col].apply(eval)
+                
                 st.success("Data loaded successfully!")
                 
                 st.subheader("Your Film Data")
                 st.dataframe(films_df)
-                
                 csv = films_df.to_csv(index=False).encode('utf-8')
                 st.download_button(
                     label="Download as CSV",
@@ -35,6 +38,9 @@ def main():
                     file_name=f'{username}_letterboxd.csv',
                     mime='text/csv'
                 )
+                
+                st.header("Genres and Themes")
+                st.plotly_chart(plot_popular_genres(films_df), use_container_width=True)
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 
