@@ -54,7 +54,7 @@ def plot_ratings_histogram(films_df: pd.DataFrame, selected_genres=None):
         ),
         showlegend=False,
         height=350,
-        margin=dict(t=80),
+        margin=dict(t=80, b=20),
     )
 
     return fig

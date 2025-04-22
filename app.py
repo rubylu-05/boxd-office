@@ -10,6 +10,7 @@ from visualizations.decades.popular_decades import plot_popular_decades
 from visualizations.decades.decade_radar import plot_decades_rating_radar
 from visualizations.decades.year_ratings import plot_yearly_average_ratings
 from visualizations.ratings.ratings_histogram import plot_ratings_histogram  # Import the histogram function
+from visualizations.ratings.ratings_pie import plot_ratings_pie  # Import the pie chart function
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -61,32 +62,34 @@ if 'films_df' in st.session_state:
         mime='text/csv'
     )
     st.markdown('##')
-    
-    st.markdown(f"<h2 style='color: {GREEN};'>Your Ratings</h2>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
+
+    st.markdown(f"<h2 style='color: {GREEN};'>Likes and Ratings</h2>", unsafe_allow_html=True)
 
     # decade filter
-    with col1:
-        all_decades = sorted(films_df['decade'].unique())
-        decades_labels = [f"{decade}s" for decade in all_decades]
-        selected_decades = st.multiselect("Filter by decade:", options=decades_labels, key="decades_filter")
-        if selected_decades:
-            selected_decade_values = [int(decade[:-1]) for decade in selected_decades]
-            filtered_df = films_df[films_df['decade'].isin(selected_decade_values)]
-        else:
-            filtered_df = films_df
+    all_decades = sorted(films_df['decade'].unique())
+    decades_labels = [f"{decade}s" for decade in all_decades]
+    selected_decades = st.multiselect("Filter by decade:", options=decades_labels, key="decades_filter")
+    if selected_decades:
+        selected_decade_values = [int(decade[:-1]) for decade in selected_decades]
+        filtered_df = films_df[films_df['decade'].isin(selected_decade_values)]
+    else:
+        filtered_df = films_df
 
     # genre filter
+    all_genres = sorted({genre for genres in filtered_df['genres'] for genre in genres})
+    selected_genres = st.multiselect("Filter by genre:", options=all_genres, key="genres_filter")
+
+    if selected_genres:
+        filtered_df = filtered_df[filtered_df['genres'].apply(lambda genres: any(g in genres for g in selected_genres))]
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.plotly_chart(plot_ratings_histogram(filtered_df, selected_genres), use_container_width=True)
     with col2:
-        all_genres = sorted({genre for genres in filtered_df['genres'] for genre in genres})
-        selected_genres = st.multiselect("Filter by genre:", options=all_genres, key="genres_filter")
+        st.plotly_chart(plot_ratings_pie(filtered_df), use_container_width=True)
 
-        if selected_genres:
-            filtered_df = filtered_df[filtered_df['genres'].apply(lambda genres: any(g in genres for g in selected_genres))]
-
-    st.plotly_chart(plot_ratings_histogram(filtered_df, selected_genres), use_container_width=True)
     st.plotly_chart(plot_ratings_scatter(filtered_df, selected_genres), use_container_width=True)
-    
+
     st.markdown(f"<h3 style='color: {BLUE}; font-weight: bold;'>Outliers</h3>", unsafe_allow_html=True)
     outliers_df = filtered_df.dropna(subset=['rating', 'avg_rating']).copy()
     if not outliers_df.empty:
