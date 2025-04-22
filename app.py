@@ -47,6 +47,8 @@ if 'films_df' not in st.session_state:
 if 'films_df' in st.session_state:
     films_df = st.session_state['films_df']
 
+    films_df['decade'] = (films_df['year'] // 10) * 10
+
     st.markdown(f"<h3 style='color: {BLUE}; font-weight: bold;'>Your Film Data</h3>", unsafe_allow_html=True)
     st.dataframe(films_df)
 
@@ -57,20 +59,32 @@ if 'films_df' in st.session_state:
         file_name=f'letterboxd_data.csv',
         mime='text/csv'
     )
+    st.markdown('##')
 
-    st.markdown(f"<h2 style='color: {GREEN};'>Your Ratings</h2>", unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
 
-    all_genres = sorted({genre for genres in films_df['genres'] for genre in genres})
-    selected_genres = st.multiselect("Filter by genre:", options=all_genres)
+    # decade filter
+    with col1:
+        all_decades = sorted(films_df['decade'].unique())
+        decades_labels = [f"{decade}s" for decade in all_decades]
+        selected_decades = st.multiselect("Filter by decade:", options=decades_labels)
+        if selected_decades:
+            selected_decade_values = [int(decade[:-1]) for decade in selected_decades]
+            filtered_df = films_df[films_df['decade'].isin(selected_decade_values)]
+        else:
+            filtered_df = films_df
 
-    if selected_genres:
-        filtered_df = films_df[films_df['genres'].apply(lambda genres: any(g in genres for g in selected_genres))]
-    else:
-        filtered_df = films_df
+    # genre filter
+    with col2:
+        all_genres = sorted({genre for genres in filtered_df['genres'] for genre in genres})
+        selected_genres = st.multiselect("Filter by genre:", options=all_genres)
+
+        if selected_genres:
+            filtered_df = filtered_df[filtered_df['genres'].apply(lambda genres: any(g in genres for g in selected_genres))]
 
     st.plotly_chart(plot_ratings_scatter(filtered_df, selected_genres), use_container_width=True)
+    
     st.markdown(f"<h3 style='color: {BLUE}; font-weight: bold;'>Outliers</h3>", unsafe_allow_html=True)
-
     outliers_df = filtered_df.dropna(subset=['rating', 'avg_rating']).copy()
     if not outliers_df.empty:
         outliers_df['diff'] = (outliers_df['rating'] - outliers_df['avg_rating']).abs()
@@ -88,13 +102,13 @@ if 'films_df' in st.session_state:
     st.markdown('##')
 
     st.markdown(f"<h2 style='color: {GREEN};'>Genres and Themes</h2>", unsafe_allow_html=True)
-    st.plotly_chart(plot_popular_genres(films_df), use_container_width=True)
-    st.plotly_chart(plot_genre_rating_radar(films_df), use_container_width=True)
-    st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
-    st.plotly_chart(plot_theme_rating_radar(films_df), use_container_width=True)
+    st.plotly_chart(plot_popular_genres(filtered_df), use_container_width=True)
+    st.plotly_chart(plot_genre_rating_radar(filtered_df), use_container_width=True)
+    st.plotly_chart(plot_popular_themes(filtered_df), use_container_width=True)
+    st.plotly_chart(plot_theme_rating_radar(filtered_df), use_container_width=True)
     st.markdown('##')
 
     st.markdown(f"<h2 style='color: {GREEN};'>Decades</h2>", unsafe_allow_html=True)
-    st.plotly_chart(plot_popular_decades(films_df), use_container_width=True)
-    st.plotly_chart(plot_decades_rating_radar(films_df), use_container_width=True)
-    st.plotly_chart(plot_yearly_average_ratings(films_df), use_container_width=True)
+    st.plotly_chart(plot_popular_decades(filtered_df), use_container_width=True)
+    st.plotly_chart(plot_decades_rating_radar(filtered_df), use_container_width=True)
+    st.plotly_chart(plot_yearly_average_ratings(filtered_df), use_container_width=True)
