@@ -18,6 +18,7 @@ from visualizations.obscurity.liked_histogram import plot_liked_histogram
 from visualizations.obscurity.ratings_histogram import plot_avg_rating_distribution
 from visualizations.actors.popular_actors import plot_popular_actors
 from visualizations.actors.popular_directors import plot_popular_directors
+from visualizations.actors.director_radar import plot_director_rating_radar
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -192,3 +193,4 @@ if 'films_df' in st.session_state:
     st.markdown(f"<a name='actors-directors'></a><h2 style='color: {GREEN};'>Actors & Directors</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_actors(films_df), use_container_width=True)
     st.plotly_chart(plot_popular_directors(films_df), user_container_width=True)
+    st.plotly_chart(plot_director_rating_radar(films_df), use_container_width=True)
