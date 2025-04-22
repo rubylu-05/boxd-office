@@ -6,8 +6,14 @@ def plot_runtime_scatter(films_df: pd.DataFrame, selected_genres=None):
     # drop films without runtime or rating
     df = films_df.dropna(subset=['runtime', 'rating'])
 
-    # filter for reasonable runtimes
-    df = df[(df['runtime'] >= 20) & (df['runtime'] <= 300)]
+    # iqr filtering to remove runtime outliers
+    q1 = df['runtime'].quantile(0.25)
+    q3 = df['runtime'].quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+
+    df = df[(df['runtime'] >= lower_bound) & (df['runtime'] <= upper_bound)]
     df = df.sort_values(by='rating', ascending=False)
 
     df['hover_text'] = df.apply(
@@ -38,7 +44,7 @@ def plot_runtime_scatter(films_df: pd.DataFrame, selected_genres=None):
 
     fig.update_layout(
         title={
-            'text': "Runtime vs. Your Rating",
+            'text': "Runtime vs. Rating",
             'font': {'size': 26, 'color': BLUE},
             'x': 0.0,
             'xanchor': 'left'
@@ -47,7 +53,6 @@ def plot_runtime_scatter(films_df: pd.DataFrame, selected_genres=None):
             title='<b>Runtime (minutes)</b>',
             title_font=dict(size=16, color='white'),
             tickfont=dict(color='white'),
-            range=[0, 310],
             showgrid=True,
             gridcolor='dark gray'
         ),
