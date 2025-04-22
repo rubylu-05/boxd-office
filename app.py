@@ -20,19 +20,81 @@ from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 
-st.set_page_config(page_title="Boxd Office", page_icon="🍿")
+st.set_page_config(page_title="Boxd Office", page_icon="🍿", layout="wide")
 
+# sticky sidebar
+st.markdown(f"""
+<style>
+html {{
+  scroll-behavior: smooth;
+}}
+
+#MainMenu, footer {{visibility: hidden;}}
+
+[data-testid="stSidebar"] > div:first-child {{
+  position: relative;
+}}
+
+.sidebar-toc {{
+  position: sticky;
+  top: 0;
+  padding-top: 1rem;
+  z-index: 999;
+  background-color: transparent !important;
+}}
+
+.sidebar-toc h3 {{
+  color: {GREEN};
+  margin-bottom: 0.5rem;
+}}
+
+.sidebar-toc ul {{
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0;
+}}
+
+.sidebar-toc li {{
+  margin-bottom: 0.25rem;
+}}
+
+.sidebar-toc a {{
+  text-decoration: none;
+  color: #ddd;
+  font-size: 0.95rem;
+}}
+
+.sidebar-toc a:hover {{
+  color: {ORANGE};
+}}
+</style>
+""", unsafe_allow_html=True)
+
+# sidebar table of contents
+with st.sidebar:
+    st.markdown(f"""
+    <div class="sidebar-toc">
+      <h3>Contents</h3>
+      <ul>
+        <li><a href="#likes-ratings">Likes & Ratings</a></li>
+        <li><a href="#genres-themes">Genres & Themes</a></li>
+        <li><a href="#decades">Decades</a></li>
+        <li><a href="#runtime">Runtime</a></li>
+        <li><a href="#obscurity">Obscurity</a></li>
+      </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+# main app
 def load_data(username):
     films_df = pd.read_csv('rubylu.csv')
     for col in ['genres', 'themes', 'cast']:
         films_df[col] = films_df[col].apply(eval)
     return films_df
 
-# page header
-st.markdown(f"<h1 style='font-size: 4.5em;'><span style='color: {ORANGE};'>Boxd</span>·<span style='color: {GREEN};'>Office</span></h1>", unsafe_allow_html=True)
+st.markdown(f"<div style='font-size: 4.5em; font-weight: bold;'><span style='color: {ORANGE};'>Boxd</span>·<span style='color: {GREEN};'>Office</span></div>", unsafe_allow_html=True)
 st.write("Visualize your Letterboxd film data!")
 
-# username input
 if 'films_df' not in st.session_state:
     with st.form("user_input"):
         username = st.text_input("Enter your Letterboxd username:")
@@ -50,49 +112,35 @@ if 'films_df' not in st.session_state:
                         st.error(f"Failed to load data: {e}")
                         st.stop()
 
-# main app logic (after data loads)
 if 'films_df' in st.session_state:
     films_df = st.session_state['films_df']
-
     films_df['decade'] = (films_df['year'] // 10) * 10
 
-    st.markdown(f"<h3 style='color: {BLUE}; font-weight: bold;'>Your Film Data</h3>", unsafe_allow_html=True)
-    st.dataframe(films_df)
-
     csv = films_df.to_csv(index=False).encode('utf-8')
-    st.download_button(
-        label="Download as CSV",
-        data=csv,
-        file_name=f'letterboxd_data.csv',
-        mime='text/csv'
-    )
-    st.markdown('##')
+    st.download_button("Download Data as CSV", data=csv, file_name='letterboxd_data.csv', mime='text/csv')
+    st.divider()
 
-    st.markdown(f"<h2 style='color: {GREEN};'>Likes and Ratings</h2>", unsafe_allow_html=True)
-
-    # decade filter
     all_decades = sorted(films_df['decade'].unique())
-    decades_labels = [f"{decade}s" for decade in all_decades]
-    selected_decades = st.multiselect("Filter by decade:", options=decades_labels, key="decades_filter")
+    decades_labels = [f"{d}s" for d in all_decades]
+    selected_decades = st.multiselect("Filter by decade:", decades_labels)
     if selected_decades:
-        selected_decade_values = [int(decade[:-1]) for decade in selected_decades]
+        selected_decade_values = [int(d[:-1]) for d in selected_decades]
         filtered_df = films_df[films_df['decade'].isin(selected_decade_values)]
     else:
         filtered_df = films_df
 
-    # genre filter
-    all_genres = sorted({genre for genres in filtered_df['genres'] for genre in genres})
-    selected_genres = st.multiselect("Filter by genre:", options=all_genres, key="genres_filter")
-
+    all_genres = sorted({g for genres in filtered_df['genres'] for g in genres})
+    selected_genres = st.multiselect("Filter by genre:", all_genres)
     if selected_genres:
         filtered_df = filtered_df[filtered_df['genres'].apply(lambda genres: any(g in genres for g in selected_genres))]
 
+    # likes & ratings
+    st.markdown(f"<a name='likes-ratings'></a><h2 style='color: {GREEN};'>Likes & Ratings</h2>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
         st.plotly_chart(plot_ratings_histogram(filtered_df, selected_genres), use_container_width=True)
     with col2:
         st.plotly_chart(plot_liked_pie(filtered_df), use_container_width=True)
-
     st.plotly_chart(plot_ratings_scatter(filtered_df, selected_genres), use_container_width=True)
 
     st.markdown(f"<h3 style='color: {BLUE}; font-weight: bold;'>Outliers</h3>", unsafe_allow_html=True)
@@ -100,7 +148,6 @@ if 'films_df' in st.session_state:
     if not outliers_df.empty:
         outliers_df['diff'] = (outliers_df['rating'] - outliers_df['avg_rating']).abs()
         top_outliers = outliers_df.sort_values(by='diff', ascending=False).head(5)
-
         for _, row in top_outliers.iterrows():
             direction = "higher" if row['rating'] > row['avg_rating'] else "lower"
             diff = round(abs(row['rating'] - row['avg_rating']), 2)
@@ -110,27 +157,31 @@ if 'films_df' in st.session_state:
             """, unsafe_allow_html=True)
     else:
         st.write("No outliers found for the selected genre(s).")
-    st.markdown('##')
+    st.divider()
 
-    st.markdown(f"<h2 style='color: {GREEN};'>Genres and Themes</h2>", unsafe_allow_html=True)
+    # genres & themes
+    st.markdown(f"<a name='genres-themes'></a><h2 style='color: {GREEN};'>Genres & Themes</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_genres(filtered_df), use_container_width=True)
     st.plotly_chart(plot_genre_rating_radar(filtered_df), use_container_width=True)
     st.plotly_chart(plot_popular_themes(filtered_df), use_container_width=True)
     # st.plotly_chart(plot_theme_rating_radar(filtered_df), use_container_width=True)
-    st.markdown('##')
+    st.divider()
 
-    st.markdown(f"<h2 style='color: {GREEN};'>Decades</h2>", unsafe_allow_html=True)
+    # decades
+    st.markdown(f"<a name='decades'></a><h2 style='color: {GREEN};'>Decades</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_decades(filtered_df), use_container_width=True)
     st.plotly_chart(plot_decades_rating_radar(filtered_df), use_container_width=True)
     st.plotly_chart(plot_yearly_average_ratings(filtered_df), use_container_width=True)
-    st.markdown('##')
-    
-    st.markdown(f"<h2 style='color: {GREEN};'>Runtime</h2>", unsafe_allow_html=True)
+    st.divider()
+
+    # runtime
+    st.markdown(f"<a name='runtime'></a><h2 style='color: {GREEN};'>Runtime</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_runtime_histogram(films_df), use_container_width=True)
-    st.plotly_chart(plot_runtime_scatter(films_df), user_container_width=True)
-    st.markdown('##')
-    
-    st.markdown(f"<h2 style='color: {GREEN};'>Obscurity</h2>", unsafe_allow_html=True)
+    st.plotly_chart(plot_runtime_scatter(films_df), use_container_width=True)
+    st.divider()
+
+    # obscurity
+    st.markdown(f"<a name='obscurity'></a><h2 style='color: {GREEN};'>Obscurity</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_members_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_liked_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_avg_rating_distribution(films_df), use_container_width=True)
