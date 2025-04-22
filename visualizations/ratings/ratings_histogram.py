@@ -35,6 +35,7 @@ def plot_ratings_histogram(films_df: pd.DataFrame, selected_genres=None):
             title_font=dict(size=16, color='white'),
             tickfont=dict(color='white'),
             range=[0, 5],
+            dtick=1,
             showgrid=True,
             gridcolor='dark gray'
         ),

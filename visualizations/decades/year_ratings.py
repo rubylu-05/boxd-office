@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
 from theme import ORANGE, GRAY
+from utils import format_with_linebreaks
 
 def plot_yearly_average_ratings(films_df: pd.DataFrame, group_by_decade=False):
     # drop rows with missing year or rating
@@ -35,7 +36,7 @@ def plot_yearly_average_ratings(films_df: pd.DataFrame, group_by_decade=False):
             f"<span style='color:{ORANGE}'><b>Liked:</b></span> {row['liked']} ({round(100 * row['liked'] / row['total'])}%)<br>" +
             f"<span style='color:{ORANGE}'><b>Number of Films:</b></span> {row['total']}<br>" +
             (
-                f"<span style='color:{ORANGE}'><b>Examples:</b></span> {', '.join(row['examples'])}"
+                f"<span style='color:{ORANGE}'><b>Examples:</b></span> {format_with_linebreaks(row['examples'])}"
                 if isinstance(row['examples'], list) and row['examples'] else ""
             )
         ),

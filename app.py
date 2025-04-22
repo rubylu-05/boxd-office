@@ -16,6 +16,7 @@ from visualizations.runtime.runtime_scatter import plot_runtime_scatter
 from visualizations.obscurity.members_histogram import plot_members_histogram
 from visualizations.obscurity.liked_histogram import plot_liked_histogram
 from visualizations.obscurity.ratings_histogram import plot_avg_rating_distribution
+from visualizations.actors.popular_actors import plot_popular_actors
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -106,6 +107,7 @@ if 'films_df' in st.session_state:
                     <a href="#decades">Decades</a>
                     <a href="#runtime">Runtime</a>
                     <a href="#obscurity">Obscurity</a>
+                    <a href="#actors-directors">Actors & Directors</a>
                     <a href="#home" style='color: {GREEN}; font-style: italic'>Back to top</a>
                 </div>
             </div>
@@ -183,3 +185,8 @@ if 'films_df' in st.session_state:
     st.plotly_chart(plot_members_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_liked_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_avg_rating_distribution(films_df), use_container_width=True)
+    st.divider()
+    
+    # actors & directors
+    st.markdown(f"<a name='actors-directors'></a><h2 style='color: {GREEN};'>Actors & Directors</h2>", unsafe_allow_html=True)
+    st.plotly_chart(plot_popular_actors(films_df), use_container_width=True)

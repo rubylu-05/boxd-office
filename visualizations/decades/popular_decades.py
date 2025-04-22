@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
 from theme import BLUE, GRAY
+from utils import format_with_linebreaks
 
 def plot_popular_decades(films_df: pd.DataFrame):
     films_df = films_df.dropna(subset=['year'])
@@ -35,9 +36,9 @@ def plot_popular_decades(films_df: pd.DataFrame):
             f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {row['total']}<br>" +
             f"<span style='color:{BLUE}'><b>Liked:</b></span> {row['liked']} "
             f"({round(100 * row['liked'] / row['total'])}%)<br>" +
-            f"<span style='color:{BLUE}'><b>Examples:</b></span> {', '.join(row['examples'])}<br>" +
+            f"<span style='color:{BLUE}'><b>Examples:</b></span> {format_with_linebreaks(row['examples'])}<br>" +
             (
-                f"<span style='color:{BLUE}'><b>Your Favourites:</b></span> {', '.join(row['favourites'])}"
+                f"<span style='color:{BLUE}'><b>Your Favourites:</b></span> {format_with_linebreaks(row['favourites'])}"
                 if isinstance(row['favourites'], list) and row['favourites'] else ""
             )
         ),
