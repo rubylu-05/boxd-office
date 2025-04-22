@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import warnings
 from visualizations.ratings.ratings_scatter import plot_ratings_scatter
+from visualizations.ratings.ratings_histogram import plot_ratings_histogram
+from visualizations.ratings.liked_pie import plot_liked_pie
 from visualizations.genres.popular_genres import plot_popular_genres
 from visualizations.genres.genre_radar import plot_genre_rating_radar
 from visualizations.genres.popular_themes import plot_popular_themes
@@ -9,12 +11,11 @@ from visualizations.genres.theme_radar import plot_theme_rating_radar
 from visualizations.decades.popular_decades import plot_popular_decades
 from visualizations.decades.decade_radar import plot_decades_rating_radar
 from visualizations.decades.year_ratings import plot_yearly_average_ratings
-from visualizations.ratings.ratings_histogram import plot_ratings_histogram
-from visualizations.ratings.ratings_pie import plot_ratings_pie
 from visualizations.runtime.runtime_histogram import plot_runtime_histogram
 from visualizations.runtime.runtime_scatter import plot_runtime_scatter
 from visualizations.obscurity.members_histogram import plot_members_histogram
 from visualizations.obscurity.liked_histogram import plot_liked_histogram
+from visualizations.obscurity.ratings_histogram import plot_avg_rating_distribution
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -90,7 +91,7 @@ if 'films_df' in st.session_state:
     with col1:
         st.plotly_chart(plot_ratings_histogram(filtered_df, selected_genres), use_container_width=True)
     with col2:
-        st.plotly_chart(plot_ratings_pie(filtered_df), use_container_width=True)
+        st.plotly_chart(plot_liked_pie(filtered_df), use_container_width=True)
 
     st.plotly_chart(plot_ratings_scatter(filtered_df, selected_genres), use_container_width=True)
 
@@ -132,3 +133,4 @@ if 'films_df' in st.session_state:
     st.markdown(f"<h2 style='color: {GREEN};'>Obscurity</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_members_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_liked_histogram(films_df), use_container_width=True)
+    st.plotly_chart(plot_avg_rating_distribution(films_df), use_container_width=True)
