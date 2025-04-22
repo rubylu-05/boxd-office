@@ -20,7 +20,7 @@ from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 
-st.set_page_config(page_title="Boxd Office", page_icon="🍿", layout="wide")
+st.set_page_config(page_title="Boxd Office", page_icon="🍿", layout="centered")
 
 # main app
 def load_data(username):
@@ -29,7 +29,7 @@ def load_data(username):
         films_df[col] = films_df[col].apply(eval)
     return films_df
 
-st.markdown(f"<div style='font-size: 4.5em; font-weight: bold;'><span style='color: {ORANGE};'>Boxd</span>·<span style='color: {GREEN};'>Office</span></div>", unsafe_allow_html=True)
+st.markdown(f"<div id='home' style='font-size: 4.5em; font-weight: bold;'><span style='color: {ORANGE};'>Boxd</span>·<span style='color: {GREEN};'>Office</span></div>", unsafe_allow_html=True)
 st.write("Visualize your Letterboxd film data!")
 
 if 'films_df' not in st.session_state:
@@ -53,16 +53,62 @@ if 'films_df' in st.session_state:
     # render sidebar only after data is loaded
     with st.sidebar:
         st.markdown(f"""
-        <div class="sidebar-toc">
-          <h3>📚 Contents</h3>
-          <ul>
-            <li><a href="#likes-ratings">Likes & Ratings</a></li>
-            <li><a href="#genres-themes">Genres & Themes</a></li>
-            <li><a href="#decades">Decades</a></li>
-            <li><a href="#runtime">Runtime</a></li>
-            <li><a href="#obscurity">Obscurity</a></li>
-          </ul>
-        </div>
+            <style>
+            section[data-testid="stSidebar"] > div:first-child {{
+                padding: 0;
+                margin: 0;
+                height: 100vh !important;
+                overflow: hidden !important;
+                display: flex;
+                flex-direction: column;
+            }}
+
+            .sidebar-toc-wrapper {{
+                padding: 1rem;
+            }}
+
+            .sidebar-label {{
+                color: white;
+                font-style: italic;
+                margin-bottom: 0.25rem;
+                font-size: 14px;
+            }}
+
+            .sidebar-toc a {{
+                display: block;
+                font-size: 15px;
+                color: white;
+                padding: 4px 0;
+                text-decoration: none;
+            }}
+            
+            .sidebar-toc a:hover {{
+                text-decoration: underline;
+                text-decoration-color: {GREEN};
+                text-decoration-thickness: 0.1px;
+                text-underline-offset: 3px;
+            }}
+
+            [data-testid="stSidebar"] .block-container {{
+                overflow: hidden !important;
+            }}
+
+            #home {{
+                scroll-margin-top: 70px;  /* Adjust this value to your desired offset */
+            }}
+            </style>
+
+            <div class="sidebar-toc-wrapper">
+                <div class="sidebar-label" style="color: {GREEN};">Go to:</div>
+                <div class="sidebar-toc">
+                    <a href="#likes-ratings">Likes & Ratings</a>
+                    <a href="#genres-themes">Genres & Themes</a>
+                    <a href="#decades">Decades</a>
+                    <a href="#runtime">Runtime</a>
+                    <a href="#obscurity">Obscurity</a>
+                    <a href="#home" style='color: {GREEN}; font-style: italic'>Back to top</a>
+                </div>
+            </div>
         """, unsafe_allow_html=True)
 
     films_df = st.session_state['films_df']
