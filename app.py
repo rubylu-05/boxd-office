@@ -69,12 +69,30 @@ if 'films_df' in st.session_state:
         filtered_df = films_df
 
     st.plotly_chart(plot_ratings_scatter(filtered_df, selected_genres), use_container_width=True)
+    st.markdown(f"<h3 style='color: {BLUE}; font-weight: bold;'>Outliers</h3>", unsafe_allow_html=True)
+
+    outliers_df = filtered_df.dropna(subset=['rating', 'avg_rating']).copy()
+    if not outliers_df.empty:
+        outliers_df['diff'] = (outliers_df['rating'] - outliers_df['avg_rating']).abs()
+        top_outliers = outliers_df.sort_values(by='diff', ascending=False).head(5)
+
+        for _, row in top_outliers.iterrows():
+            direction = "higher" if row['rating'] > row['avg_rating'] else "lower"
+            diff = round(abs(row['rating'] - row['avg_rating']), 2)
+            st.markdown(f"""
+                You rated <span style='font-style: italic;'>{row['title']} ({row['year']})</span> 
+                <span style='font-weight: bold; color: {BLUE};'>{diff} {direction}</span> than the average Letterboxd user.
+            """, unsafe_allow_html=True)
+    else:
+        st.write("No outliers found for the selected genre(s).")
+    st.markdown('##')
 
     st.markdown(f"<h2 style='color: {GREEN};'>Genres and Themes</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_genres(films_df), use_container_width=True)
     st.plotly_chart(plot_genre_rating_radar(films_df), use_container_width=True)
     st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
     st.plotly_chart(plot_theme_rating_radar(films_df), use_container_width=True)
+    st.markdown('##')
 
     st.markdown(f"<h2 style='color: {GREEN};'>Decades</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_decades(films_df), use_container_width=True)
