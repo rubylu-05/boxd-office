@@ -33,6 +33,7 @@ def plot_yearly_average_ratings(films_df: pd.DataFrame, group_by_decade=False):
             f"<span style='color:{ORANGE}'><b>Year:</b></span> {row.name}<br>" +
             f"<span style='color:{ORANGE}'><b>Average Rating:</b></span> {row['your_avg']:.2f}<br>" +
             f"<span style='color:{ORANGE}'><b>Liked:</b></span> {row['liked']} ({round(100 * row['liked'] / row['total'])}%)<br>" +
+            f"<span style='color:{ORANGE}'><b>Number of Films:</b></span> {row['total']}<br>" +
             (
                 f"<span style='color:{ORANGE}'><b>Examples:</b></span> {', '.join(row['examples'])}"
                 if isinstance(row['examples'], list) and row['examples'] else ""
@@ -44,7 +45,8 @@ def plot_yearly_average_ratings(films_df: pd.DataFrame, group_by_decade=False):
     data['hover_text_overall'] = data.apply(
         lambda row: (
             f"<span><b>Year:</b></span> {row.name}<br>" +
-            f"<span><b>Average Rating:</b></span> {row['overall_avg']:.2f}"
+            f"<span><b>Average Rating:</b></span> {row['overall_avg']:.2f}<br>" +
+            f"<span><b>Number of Films:</b></span> {row['total']}"
         ),
         axis=1
     )
@@ -91,7 +93,7 @@ def plot_yearly_average_ratings(films_df: pd.DataFrame, group_by_decade=False):
         yaxis=dict(
             title='Average Rating',
             title_font=dict(size=16, weight='bold'),
-            range=[0, 5]
+            range=[0, 5.2]
         ),
         hoverlabel=dict(
             bgcolor=GRAY,

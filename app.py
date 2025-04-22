@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import warnings
+from visualizations.ratings.ratings_scatter import plot_ratings_scatter
 from visualizations.genres.popular_genres import plot_popular_genres
 from visualizations.genres.genre_radar import plot_genre_rating_radar
 from visualizations.genres.popular_themes import plot_popular_themes
@@ -46,7 +47,9 @@ def main():
                     file_name=f'{username}_letterboxd.csv',
                     mime='text/csv'
                 )
-
+                
+                st.markdown(f"<h2 style='color: {GREEN};'>Your Ratings</h2>", unsafe_allow_html=True)
+                st.plotly_chart(plot_ratings_scatter(films_df), use_container_width=True)
                 st.markdown(f"<h2 style='color: {GREEN};'>Genres and Themes</h2>", unsafe_allow_html=True)
                 st.plotly_chart(plot_popular_genres(films_df), use_container_width=True)
                 st.plotly_chart(plot_genre_rating_radar(films_df), use_container_width=True)
