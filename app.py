@@ -13,6 +13,7 @@ from visualizations.ratings.ratings_histogram import plot_ratings_histogram
 from visualizations.ratings.ratings_pie import plot_ratings_pie
 from visualizations.runtime.runtime_histogram import plot_runtime_histogram
 from visualizations.runtime.runtime_scatter import plot_runtime_scatter
+from visualizations.obscurity.members_histogram import plot_members_histogram
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -125,3 +126,7 @@ if 'films_df' in st.session_state:
     st.markdown(f"<h2 style='color: {GREEN};'>Runtime</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_runtime_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_runtime_scatter(films_df), user_container_width=True)
+    st.markdown('##')
+    
+    st.markdown(f"<h2 style='color: {GREEN};'>Obscurity</h2>", unsafe_allow_html=True)
+    st.plotly_chart(plot_members_histogram(films_df), use_container_width=True)

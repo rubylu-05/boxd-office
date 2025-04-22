@@ -2,40 +2,33 @@ import pandas as pd
 import plotly.graph_objects as go
 from theme import BLUE, GRAY
 
-def plot_runtime_histogram(films_df: pd.DataFrame):
-    # filter films that have runtimes
-    df = films_df.dropna(subset=['runtime'])
-
-    df = df[(df['runtime'] >= 20) & (df['runtime'] <= 300)]
+def plot_members_histogram(films_df: pd.DataFrame):
+    # filter films that have num_members data
+    df = films_df.dropna(subset=['num_watched'])
 
     fig = go.Figure()
 
     fig.add_trace(go.Histogram(
-        x=df['runtime'],
-        xbins=dict(
-            start=20,
-            end=300,
-            size=10  # 10-minute bins
-        ),
+        x=df['num_watched'],
+        nbinsx=40,  # auto-binned into 40 bins
         marker=dict(
             color=BLUE,
             line=dict(width=1, color='white')
         ),
-        name='Runtime Distribution',
+        name='Popularity Distribution',
     ))
 
     fig.update_layout(
         title={
-            'text': "Runtime Distribution",
+            'text': "Film Popularity Distribution",
             'font': {'size': 26, 'color': BLUE},
             'x': 0.0,
             'xanchor': 'left'
         },
         xaxis=dict(
-            title='<b>Runtime (minutes)</b>',
+            title='<b>Number of People Watched</b>',
             title_font=dict(size=16, color='white'),
             tickfont=dict(color='white'),
-            range=[0, 310],
             showgrid=True,
             gridcolor='dark gray'
         ),
