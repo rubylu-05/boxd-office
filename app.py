@@ -22,69 +22,6 @@ warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 
 st.set_page_config(page_title="Boxd Office", page_icon="🍿", layout="wide")
 
-# sticky sidebar
-st.markdown(f"""
-<style>
-html {{
-  scroll-behavior: smooth;
-}}
-
-#MainMenu, footer {{visibility: hidden;}}
-
-[data-testid="stSidebar"] > div:first-child {{
-  position: relative;
-}}
-
-.sidebar-toc {{
-  position: sticky;
-  top: 0;
-  padding-top: 1rem;
-  z-index: 999;
-  background-color: transparent !important;
-}}
-
-.sidebar-toc h3 {{
-  color: {GREEN};
-  margin-bottom: 0.5rem;
-}}
-
-.sidebar-toc ul {{
-  list-style: none;
-  padding-left: 0;
-  margin-top: 0;
-}}
-
-.sidebar-toc li {{
-  margin-bottom: 0.25rem;
-}}
-
-.sidebar-toc a {{
-  text-decoration: none;
-  color: #ddd;
-  font-size: 0.95rem;
-}}
-
-.sidebar-toc a:hover {{
-  color: {ORANGE};
-}}
-</style>
-""", unsafe_allow_html=True)
-
-# sidebar table of contents
-with st.sidebar:
-    st.markdown(f"""
-    <div class="sidebar-toc">
-      <h3>Contents</h3>
-      <ul>
-        <li><a href="#likes-ratings">Likes & Ratings</a></li>
-        <li><a href="#genres-themes">Genres & Themes</a></li>
-        <li><a href="#decades">Decades</a></li>
-        <li><a href="#runtime">Runtime</a></li>
-        <li><a href="#obscurity">Obscurity</a></li>
-      </ul>
-    </div>
-    """, unsafe_allow_html=True)
-
 # main app
 def load_data(username):
     films_df = pd.read_csv('rubylu.csv')
@@ -113,6 +50,21 @@ if 'films_df' not in st.session_state:
                         st.stop()
 
 if 'films_df' in st.session_state:
+    # render sidebar only after data is loaded
+    with st.sidebar:
+        st.markdown(f"""
+        <div class="sidebar-toc">
+          <h3>📚 Contents</h3>
+          <ul>
+            <li><a href="#likes-ratings">Likes & Ratings</a></li>
+            <li><a href="#genres-themes">Genres & Themes</a></li>
+            <li><a href="#decades">Decades</a></li>
+            <li><a href="#runtime">Runtime</a></li>
+            <li><a href="#obscurity">Obscurity</a></li>
+          </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
     films_df = st.session_state['films_df']
     films_df['decade'] = (films_df['year'] // 10) * 10
 
