@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from theme import BLUE, GRAY
 
-def plot_ratings_scatter(films_df: pd.DataFrame):
+def plot_ratings_scatter(films_df: pd.DataFrame, selected_genres=None):
     # drop films without both ratings
     df = films_df.dropna(subset=['rating', 'avg_rating'])
 
@@ -10,10 +10,9 @@ def plot_ratings_scatter(films_df: pd.DataFrame):
 
     df['hover_text'] = df.apply(
         lambda row: (
-            f"<span style='color:{BLUE}'><b>{row['title']}</b></span><br>"
+            f"<span style='color:{BLUE}'><b>Film:</b></span> {row['title']} ({row['year'] or 'N/A'})<br>"
             f"<span style='color:{BLUE}'><b>Your Rating:</b></span> {row['rating']}<br>"
             f"<span style='color:{BLUE}'><b>Avg Rating:</b></span> {row['avg_rating']}<br>"
-            f"<span style='color:{BLUE}'><b>Year:</b></span> {row['year'] or 'N/A'}"
         ),
         axis=1
     )
@@ -56,7 +55,7 @@ def plot_ratings_scatter(films_df: pd.DataFrame):
             tickfont=dict(color='white'),
             range=[0, 5],
             showgrid=True,
-            gridcolor='dark gray'
+            gridcolor='darkgray'
         ),
         yaxis=dict(
             title='<b>Your Rating</b>',
@@ -64,7 +63,7 @@ def plot_ratings_scatter(films_df: pd.DataFrame):
             tickfont=dict(color='white'),
             range=[0, 5.2],
             showgrid=True,
-            gridcolor='dark gray'
+            gridcolor='darkgray'
         ),
         hoverlabel=dict(
             bgcolor=GRAY,
@@ -75,8 +74,6 @@ def plot_ratings_scatter(films_df: pd.DataFrame):
         showlegend=False,
         height=600,
         margin=dict(t=80),
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)'
     )
 
     return fig
