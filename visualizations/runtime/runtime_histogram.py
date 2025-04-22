@@ -19,7 +19,6 @@ def plot_runtime_histogram(films_df: pd.DataFrame):
         ),
         marker=dict(
             color=BLUE,
-            line=dict(width=1, color='white')
         ),
         name='Runtime Distribution',
     ))
@@ -55,6 +54,7 @@ def plot_runtime_histogram(films_df: pd.DataFrame):
         showlegend=False,
         height=350,
         margin=dict(t=80, b=20),
+        bargap=0.05
     )
 
     return fig

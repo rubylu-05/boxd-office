@@ -118,6 +118,8 @@ if 'films_df' in st.session_state:
     st.download_button("Download Data as CSV", data=csv, file_name='letterboxd_data.csv', mime='text/csv')
     st.divider()
 
+    # likes & ratings
+    st.markdown(f"<a name='likes-ratings'></a><h2 style='color: {GREEN};'>Likes & Ratings</h2>", unsafe_allow_html=True)
     all_decades = sorted(films_df['decade'].unique())
     decades_labels = [f"{d}s" for d in all_decades]
     selected_decades = st.multiselect("Filter by decade:", decades_labels)
@@ -131,9 +133,7 @@ if 'films_df' in st.session_state:
     selected_genres = st.multiselect("Filter by genre:", all_genres)
     if selected_genres:
         filtered_df = filtered_df[filtered_df['genres'].apply(lambda genres: any(g in genres for g in selected_genres))]
-
-    # likes & ratings
-    st.markdown(f"<a name='likes-ratings'></a><h2 style='color: {GREEN};'>Likes & Ratings</h2>", unsafe_allow_html=True)
+        
     col1, col2 = st.columns(2)
     with col1:
         st.plotly_chart(plot_ratings_histogram(filtered_df, selected_genres), use_container_width=True)
@@ -159,17 +159,17 @@ if 'films_df' in st.session_state:
 
     # genres & themes
     st.markdown(f"<a name='genres-themes'></a><h2 style='color: {GREEN};'>Genres & Themes</h2>", unsafe_allow_html=True)
-    st.plotly_chart(plot_popular_genres(filtered_df), use_container_width=True)
-    st.plotly_chart(plot_genre_rating_radar(filtered_df), use_container_width=True)
-    st.plotly_chart(plot_popular_themes(filtered_df), use_container_width=True)
-    # st.plotly_chart(plot_theme_rating_radar(filtered_df), use_container_width=True)
+    st.plotly_chart(plot_popular_genres(films_df), use_container_width=True)
+    st.plotly_chart(plot_genre_rating_radar(films_df), use_container_width=True)
+    st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
+    # st.plotly_chart(plot_theme_rating_radar(films_df), use_container_width=True)
     st.divider()
 
     # decades
     st.markdown(f"<a name='decades'></a><h2 style='color: {GREEN};'>Decades</h2>", unsafe_allow_html=True)
-    st.plotly_chart(plot_popular_decades(filtered_df), use_container_width=True)
-    st.plotly_chart(plot_decades_rating_radar(filtered_df), use_container_width=True)
-    st.plotly_chart(plot_yearly_average_ratings(filtered_df), use_container_width=True)
+    st.plotly_chart(plot_popular_decades(films_df), use_container_width=True)
+    st.plotly_chart(plot_decades_rating_radar(films_df), use_container_width=True)
+    st.plotly_chart(plot_yearly_average_ratings(films_df), use_container_width=True)
     st.divider()
 
     # runtime

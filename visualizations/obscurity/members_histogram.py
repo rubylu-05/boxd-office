@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from theme import BLUE, GRAY
 
 def plot_members_histogram(films_df: pd.DataFrame):
-    # filter films that have num_members data
+    # filter films that have num_watched data
     df = films_df.dropna(subset=['num_watched'])
 
     fig = go.Figure()
@@ -13,7 +13,6 @@ def plot_members_histogram(films_df: pd.DataFrame):
         nbinsx=40,  # auto-binned into 40 bins
         marker=dict(
             color=BLUE,
-            line=dict(width=1, color='white')
         ),
         name='Popularity Distribution',
     ))
@@ -48,6 +47,7 @@ def plot_members_histogram(films_df: pd.DataFrame):
         showlegend=False,
         height=350,
         margin=dict(t=80, b=20),
+        bargap=0.05
     )
 
     return fig

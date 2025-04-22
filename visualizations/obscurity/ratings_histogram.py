@@ -17,7 +17,6 @@ def plot_avg_rating_distribution(films_df: pd.DataFrame):
         ),
         marker=dict(
             color=BLUE,
-            line=dict(width=1, color='white')
         ),
         name='Average Rating Distribution',
     ))
@@ -53,6 +52,7 @@ def plot_avg_rating_distribution(films_df: pd.DataFrame):
         showlegend=False,
         height=350,
         margin=dict(t=80, b=20),
+        bargap=0.05
     )
 
     return fig

@@ -13,7 +13,6 @@ def plot_liked_histogram(films_df: pd.DataFrame):
         nbinsx=40,  # auto-binned into 40 bins
         marker=dict(
             color=ORANGE,
-            line=dict(width=1, color='white')
         ),
         name='Like Distribution',
     ))
@@ -48,6 +47,7 @@ def plot_liked_histogram(films_df: pd.DataFrame):
         showlegend=False,
         height=350,
         margin=dict(t=80, b=20),
+        bargap=0.05
     )
 
     return fig

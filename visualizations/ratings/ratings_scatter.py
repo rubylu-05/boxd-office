@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import BLUE, GRAY
+from theme import BLUE, GRAY, DARK_GRAY
 
 def plot_ratings_scatter(films_df: pd.DataFrame, selected_genres=None):
     # drop films without both ratings
@@ -27,21 +27,13 @@ def plot_ratings_scatter(films_df: pd.DataFrame, selected_genres=None):
             size=8,
             color=BLUE,
             opacity=0.9,
-            line=dict(width=1, color='white')
+            line=dict(width=1, color=DARK_GRAY)
         ),
         text=df['hover_text'],
         hovertemplate="%{text}<extra></extra>",
         name='Films'
     ))
-
-    fig.add_shape(
-        type="line",
-        x0=0, y0=0,
-        x1=5, y1=5,
-        line=dict(color=BLUE, dash='dash'),
-        xref='x', yref='y'
-    )
-
+    
     fig.update_layout(
         title={
             'text': "Your Ratings vs. Average Ratings",
@@ -55,7 +47,7 @@ def plot_ratings_scatter(films_df: pd.DataFrame, selected_genres=None):
             tickfont=dict(color='white'),
             range=[0, 5],
             showgrid=True,
-            gridcolor='darkgray'
+            gridcolor='dark gray'
         ),
         yaxis=dict(
             title='<b>Your Rating</b>',
@@ -63,7 +55,7 @@ def plot_ratings_scatter(films_df: pd.DataFrame, selected_genres=None):
             tickfont=dict(color='white'),
             range=[0, 5.2],
             showgrid=True,
-            gridcolor='darkgray'
+            gridcolor='dark gray'
         ),
         hoverlabel=dict(
             bgcolor=GRAY,

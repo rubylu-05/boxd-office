@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import BLUE, GRAY
+from theme import BLUE, GRAY, DARK_GRAY
 
 def plot_runtime_scatter(films_df: pd.DataFrame, selected_genres=None):
     # drop films without runtime or rating
@@ -35,7 +35,7 @@ def plot_runtime_scatter(films_df: pd.DataFrame, selected_genres=None):
             size=8,
             color=BLUE,
             opacity=0.9,
-            line=dict(width=1, color='white')
+            line=dict(width=1, color=DARK_GRAY)
         ),
         text=df['hover_text'],
         hovertemplate="%{text}<extra></extra>",

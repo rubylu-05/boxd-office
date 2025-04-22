@@ -61,9 +61,10 @@ def plot_decades_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
                 visible=True,
                 range=[0, 5],
                 showticklabels=False,
-                tickfont=dict(size=13, color='white'),
                 title_font=dict(size=16, color='white'),
-                gridcolor='white'
+                gridcolor='white',
+                ticks='',
+                showline=False,
             ),
             angularaxis=dict(
                 tickfont=dict(size=13, color='white'),

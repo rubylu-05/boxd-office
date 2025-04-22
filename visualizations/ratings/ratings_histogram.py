@@ -19,7 +19,6 @@ def plot_ratings_histogram(films_df: pd.DataFrame, selected_genres=None):
         ),
         marker=dict(
             color=BLUE,
-            line=dict(width=1, color='white')
         ),
         name='Rating Distribution',
     ))
@@ -55,6 +54,7 @@ def plot_ratings_histogram(films_df: pd.DataFrame, selected_genres=None):
         showlegend=False,
         height=350,
         margin=dict(t=80, b=20),
+        bargap=0.05
     )
 
     return fig
