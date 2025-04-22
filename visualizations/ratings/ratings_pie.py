@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from theme import ORANGE, GRAY
 
-def plot_ratings_pie(films_df: pd.DataFrame, threshold=3.0):
+def plot_ratings_pie(films_df: pd.DataFrame):
     liked_count = films_df['liked'].sum()
     not_liked_count = len(films_df) - liked_count
 

@@ -9,8 +9,9 @@ from visualizations.genres.theme_radar import plot_theme_rating_radar
 from visualizations.decades.popular_decades import plot_popular_decades
 from visualizations.decades.decade_radar import plot_decades_rating_radar
 from visualizations.decades.year_ratings import plot_yearly_average_ratings
-from visualizations.ratings.ratings_histogram import plot_ratings_histogram  # Import the histogram function
-from visualizations.ratings.ratings_pie import plot_ratings_pie  # Import the pie chart function
+from visualizations.ratings.ratings_histogram import plot_ratings_histogram
+from visualizations.ratings.ratings_pie import plot_ratings_pie
+from visualizations.runtime.runtime_histogram import plot_runtime_histogram
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -24,7 +25,7 @@ def load_data(username):
     return films_df
 
 # page header
-st.markdown(f"<h1 style='font-size: 4em;'><span style='color: {ORANGE};'>Boxd</span>·<span style='color: {GREEN};'>Office</span></h1>", unsafe_allow_html=True)
+st.markdown(f"<h1 style='font-size: 4.5em;'><span style='color: {ORANGE};'>Boxd</span>·<span style='color: {GREEN};'>Office</span></h1>", unsafe_allow_html=True)
 st.write("Visualize your Letterboxd film data!")
 
 # username input
@@ -118,3 +119,7 @@ if 'films_df' in st.session_state:
     st.plotly_chart(plot_popular_decades(filtered_df), use_container_width=True)
     st.plotly_chart(plot_decades_rating_radar(filtered_df), use_container_width=True)
     st.plotly_chart(plot_yearly_average_ratings(filtered_df), use_container_width=True)
+    st.markdown('##')
+    
+    st.markdown(f"<h2 style='color: {GREEN};'>Runtime</h2>", unsafe_allow_html=True)
+    st.plotly_chart(plot_runtime_histogram(films_df), use_container_width=True)
