@@ -33,7 +33,7 @@ def get_film_details(film_slug):
         'cast': [],
         'studios': [],
         'countries': [],
-        'languages': []
+        'language': None
     }
 
     try:
@@ -75,11 +75,34 @@ def get_film_details(film_slug):
 
         details_div = soup.find('div', id='tab-details')
         
-        # get studios, countries, and languages
+        # get studios, countries, and primary language
         if details_div:
             details['studios'] = [a.text for a in details_div.find_all('a', href=lambda x: x and '/studio/' in x)]
             details['countries'] = [a.text for a in details_div.find_all('a', href=lambda x: x and '/films/country/' in x)]
-            details['languages'] = [a.text for a in details_div.find_all('a', href=lambda x: x and '/films/language/' in x)]
+
+            # extract just the primary language
+            lang_header = details_div.find('h3', string=lambda text: text and "Primary Language" in text)
+            if lang_header:
+                lang_block = lang_header.find_next_sibling('div', class_='text-sluglist')
+                if lang_block:
+                    lang_link = lang_block.find('a')
+                    if lang_link:
+                        details['language'] = lang_link.text.strip()
+                    else:
+                        details['language'] = None
+            else:
+                # check for "Language" section if "Primary Language" isn't present
+                lang_header = details_div.find('h3', string=lambda text: text and "Language" in text)
+                if lang_header:
+                    lang_block = lang_header.find_next_sibling('div', class_='text-sluglist')
+                    if lang_block:
+                        lang_link = lang_block.find('a')
+                        if lang_link:
+                            details['language'] = lang_link.text.strip()
+                        else:
+                            details['language'] = None
+                else:
+                    details['language'] = None
 
         # get average rating
         ratings_url = f"https://letterboxd.com/csi/film/{film_slug}/rating-histogram/"
@@ -107,7 +130,7 @@ def get_film_details(film_slug):
     return film_slug, details
 
 
-def get_films(username, max_threads=20):
+def get_films(username, max_threads=10):
     base_url = f"https://letterboxd.com/{username}/films/by/date-earliest/"
     films = []
     film_slug_to_film = {}

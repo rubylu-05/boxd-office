@@ -28,7 +28,7 @@ st.set_page_config(page_title="Boxd Office", page_icon="🍿", layout="centered"
 # main app
 def load_data(username):
     films_df = pd.read_csv('rubylu.csv')
-    for col in ['genres', 'themes', 'cast', 'directors', 'studios', 'countries', 'languages']:
+    for col in ['genres', 'themes', 'cast', 'directors', 'studios', 'countries']:
         films_df[col] = films_df[col].apply(eval)
     return films_df
 
