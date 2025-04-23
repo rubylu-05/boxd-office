@@ -4,20 +4,6 @@ BLUE = "#40bbf4"
 GRAY = "#202831"
 DARK_GRAY = "#15191e"
 
-star_to_rating = {
-    "★": 1,
-    "★★": 2,
-    "★★★": 3,
-    "★★★★": 4,
-    "★★★★★": 5,
-    "½": 0.5,
-    "★½": 1.5,
-    "★★½": 2.5,
-    "★★★½": 3.5,
-    "★★★★½": 4.5,
-    None: None
-}
-
 def format_with_linebreaks(items, max_line_length=100):
     lines = []
     current_line = ""
