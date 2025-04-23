@@ -24,7 +24,7 @@ def plot_avg_rating_distribution(films_df: pd.DataFrame):
     fig.update_layout(
         title={
             'text': "Average Rating Distribution",
-            'font': {'size': 26, 'color': BLUE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

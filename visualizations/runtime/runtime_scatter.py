@@ -45,7 +45,7 @@ def plot_runtime_scatter(films_df: pd.DataFrame, selected_genres=None):
     fig.update_layout(
         title={
             'text': "Runtime vs. Rating",
-            'font': {'size': 26, 'color': BLUE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

@@ -26,7 +26,7 @@ def plot_runtime_histogram(films_df: pd.DataFrame):
     fig.update_layout(
         title={
             'text': "Runtime Distribution",
-            'font': {'size': 26, 'color': BLUE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

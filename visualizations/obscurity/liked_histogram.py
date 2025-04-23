@@ -20,7 +20,7 @@ def plot_liked_histogram(films_df: pd.DataFrame):
     fig.update_layout(
         title={
             'text': "Film Like Distribution",
-            'font': {'size': 26, 'color': ORANGE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

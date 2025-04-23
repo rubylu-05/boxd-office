@@ -37,7 +37,7 @@ def plot_ratings_scatter(films_df: pd.DataFrame, selected_genres=None):
     fig.update_layout(
         title={
             'text': "Your Ratings vs. Average Ratings",
-            'font': {'size': 26, 'color': BLUE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

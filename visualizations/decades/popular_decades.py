@@ -75,7 +75,7 @@ def plot_popular_decades(films_df: pd.DataFrame):
         barmode='stack',
         title={
             'text': "Most Watched Decades",
-            'font': {'size': 26, 'color': BLUE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

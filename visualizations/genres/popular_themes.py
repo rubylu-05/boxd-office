@@ -77,7 +77,7 @@ def plot_popular_themes(films_df: pd.DataFrame):
         barmode='stack',
         title={
             'text': "Most Watched Themes",
-            'font': {'size': 26, 'color': ORANGE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

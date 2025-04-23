@@ -81,7 +81,7 @@ def plot_yearly_average_ratings(films_df: pd.DataFrame, group_by_decade=False):
     fig.update_layout(
         title={
             'text': "Average Ratings by Year" if not group_by_decade else "Average Ratings by Decade",
-            'font': {'size': 26, 'color': ORANGE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

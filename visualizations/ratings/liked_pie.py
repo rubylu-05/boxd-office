@@ -20,7 +20,7 @@ def plot_liked_pie(films_df: pd.DataFrame):
 
     fig.update_layout(
         title='Liked Films',
-        title_font={'size': 26, 'color': ORANGE},
+        title_font={'size': 26},
         showlegend=False,
         height=400,
         margin=dict(t=80)

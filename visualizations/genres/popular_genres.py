@@ -75,7 +75,7 @@ def plot_popular_genres(films_df: pd.DataFrame):
         barmode='stack',
         title={
             'text': "Most Watched Genres",
-            'font': {'size': 26, 'color': BLUE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

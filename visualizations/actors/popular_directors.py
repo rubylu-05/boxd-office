@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import BLUE, GRAY
+from theme import ORANGE, GRAY
 from utils import format_with_linebreaks
 
 def plot_popular_directors(films_df: pd.DataFrame):
@@ -28,10 +28,10 @@ def plot_popular_directors(films_df: pd.DataFrame):
 
     director_data['hover_text'] = director_data.apply(
         lambda row: (
-            f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {row['total']}<br>" +
-            f"<span style='color:{BLUE}'><b>Liked:</b></span> {row['liked']} "
+            f"<span style='color:{ORANGE}'><b>Number of Films:</b></span> {row['total']}<br>" +
+            f"<span style='color:{ORANGE}'><b>Liked:</b></span> {row['liked']} "
             f"({round(100 * row['liked'] / row['total'])}%)<br>" +
-            f"<span style='color:{BLUE}'><b>Examples:</b></span> {format_with_linebreaks(row['examples'])}"
+            f"<span style='color:{ORANGE}'><b>Examples:</b></span> {format_with_linebreaks(row['examples'])}"
         ),
         axis=1
     )
@@ -55,7 +55,7 @@ def plot_popular_directors(films_df: pd.DataFrame):
         x=director_data['liked'],
         name='Liked',
         orientation='h',
-        marker_color=BLUE,
+        marker_color=ORANGE,
         customdata=director_data[['hover_text']],
         hovertemplate="%{customdata[0]}<extra></extra>"
     ))
@@ -64,7 +64,7 @@ def plot_popular_directors(films_df: pd.DataFrame):
         barmode='stack',
         title={
             'text': "Most Watched Directors",
-            'font': {'size': 26, 'color': BLUE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

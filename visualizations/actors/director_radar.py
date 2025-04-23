@@ -42,7 +42,7 @@ def plot_director_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
     fig.update_layout(
         title={
             'text': "Average Ratings by Director",
-            'font': {'size': 26, 'color': ORANGE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

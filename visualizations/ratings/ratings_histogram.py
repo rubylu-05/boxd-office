@@ -26,7 +26,7 @@ def plot_ratings_histogram(films_df: pd.DataFrame, selected_genres=None):
     fig.update_layout(
         title={
             'text': "Rating Distribution",
-            'font': {'size': 26, 'color': BLUE},
+            'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
         },

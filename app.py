@@ -145,7 +145,7 @@ if 'films_df' in st.session_state:
         st.plotly_chart(plot_liked_pie(filtered_df), use_container_width=True)
     st.plotly_chart(plot_ratings_scatter(filtered_df, selected_genres), use_container_width=True)
 
-    st.markdown(f"<h3 style='color: {BLUE}; font-weight: bold;'>Outliers</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='font-weight: bold;'>Outliers</h3>", unsafe_allow_html=True)
     outliers_df = filtered_df.dropna(subset=['rating', 'avg_rating']).copy()
     if not outliers_df.empty:
         outliers_df['diff'] = (outliers_df['rating'] - outliers_df['avg_rating']).abs()
