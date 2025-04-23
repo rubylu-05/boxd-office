@@ -21,6 +21,7 @@ from visualizations.actors.popular_directors import plot_popular_directors
 from visualizations.actors.director_radar import plot_director_rating_radar
 from visualizations.studios.popular_studios import plot_popular_studios
 from visualizations.studios.studio_radar import plot_studio_rating_radar
+from visualizations.languages.popular_languages import plot_popular_languages
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -113,6 +114,7 @@ if 'films_df' in st.session_state:
                     <a href="#obscurity">Obscurity</a>
                     <a href="#actors-directors">Actors & Directors</a>
                     <a href="#studios">Studios</a>
+                    <a href="#languages-countries">Languages & Countries</a>
                     <a href="#home" style='color: {GREEN}; font-style: italic'>Back to top</a>
                 </div>
             </div>
@@ -197,8 +199,14 @@ if 'films_df' in st.session_state:
     st.plotly_chart(plot_popular_actors(films_df), use_container_width=True)
     st.plotly_chart(plot_popular_directors(films_df), user_container_width=True)
     st.plotly_chart(plot_director_rating_radar(films_df), use_container_width=True)
+    st.divider()
     
     # studios
     st.markdown(f"<a name='studios'></a><h2 style='color: {GREEN};'>Studios</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_studios(films_df), use_container_width=True)
     st.plotly_chart(plot_studio_rating_radar(films_df), use_container_width=True)
+    st.divider()
+    
+    # languages & countries
+    st.markdown(f"<a name='languages-countries'></a><h2 style='color: {GREEN};'>Languages & Countries</h2>", unsafe_allow_html=True)
+    st.plotly_chart(plot_popular_languages(films_df), use_container_width=True)
