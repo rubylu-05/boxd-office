@@ -25,13 +25,11 @@ all_entries = []
 page = 1
 
 while True:
-    print(f"Scraping page {page}...")
     response = requests.get(base_url.format(page), headers=headers)
     soup = BeautifulSoup(response.text, 'html.parser')
     rows = soup.find_all('tr', class_='diary-entry-row')
 
     if not rows:
-        print("No more diary entries found. Done scraping.")
         break
 
     # track current month and year for date rows without td-calendar
@@ -41,6 +39,10 @@ while True:
     for row in rows:
         film_poster_div = row.find('div', class_='film-poster')
         film_slug = film_poster_div['data-film-slug'] if film_poster_div else None
+
+        # film name
+        name_h3 = row.find('h3', class_='headline-3 prettify')
+        film_name = name_h3.find('a').get_text(strip=True) if name_h3 else None
 
         # date
         day_td = row.find('td', class_='td-day')
@@ -69,11 +71,11 @@ while True:
             rating = None
 
         all_entries.append({
+            'name': film_name,
             'film_slug': film_slug,
             'date': date,
             'rating': rating
         })
-        print(film_slug, date, rating)
 
     page += 1
 
