@@ -30,7 +30,10 @@ def get_film_details(film_slug):
         'genres': [],
         'themes': [],
         'directors': [],
-        'cast': []
+        'cast': [],
+        'studios': [],
+        'countries': [],
+        'languages': []
     }
 
     try:
@@ -69,6 +72,14 @@ def get_film_details(film_slug):
         if actor_div:
             actor_links = actor_div.find_all('a', href=lambda x: x and '/actor/' in x)
             details['cast'] = [a.text for a in actor_links[:12]]
+
+        details_div = soup.find('div', id='tab-details')
+        
+        # get studios, countries, and languages
+        if details_div:
+            details['studios'] = [a.text for a in details_div.find_all('a', href=lambda x: x and '/studio/' in x)]
+            details['countries'] = [a.text for a in details_div.find_all('a', href=lambda x: x and '/films/country/' in x)]
+            details['languages'] = [a.text for a in details_div.find_all('a', href=lambda x: x and '/films/language/' in x)]
 
         # get average rating
         ratings_url = f"https://letterboxd.com/csi/film/{film_slug}/rating-histogram/"
