@@ -70,11 +70,16 @@ while True:
         else:
             rating = None
 
+        # year
+        year_td = row.find('td', class_='td-released')
+        year = year_td.find('span').get_text(strip=True) if year_td else None
+
         all_entries.append({
             'name': film_name,
             'film_slug': film_slug,
             'date': date,
-            'rating': rating
+            'rating': rating,
+            'year': year
         })
 
     page += 1
