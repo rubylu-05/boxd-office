@@ -2,9 +2,9 @@ import pandas as pd
 import plotly.graph_objects as go
 from utils import format_with_linebreaks, BLUE, GRAY
 
-def plot_rating_timeline(films_df: pd.DataFrame):
+def plot_rating_timeline(diary_df: pd.DataFrame):
     # drop rows without rating or date
-    valid = films_df.dropna(subset=['date', 'rating'])
+    valid = diary_df.dropna(subset=['date', 'rating'])
 
     # sort by date
     valid = valid.sort_values('date')
