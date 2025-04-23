@@ -1,26 +1,26 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import ORANGE, GRAY
+from theme import BLUE, GRAY
 
-def plot_director_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
-    exploded = films_df.explode('directors')
-    exploded = exploded.dropna(subset=['directors', 'rating'])
+def plot_studio_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
+    exploded = films_df.explode('studios')
+    exploded = exploded.dropna(subset=['studios', 'rating'])
 
-    director_counts = exploded['directors'].value_counts()
-    top_directors = director_counts.head(top_n).index if len(director_counts) > top_n else director_counts.index
+    studio_counts = exploded['studios'].value_counts()
+    top_studios = studio_counts.head(top_n).index if len(studio_counts) > top_n else studio_counts.index
 
-    filtered = exploded[exploded['directors'].isin(top_directors)]
+    filtered = exploded[exploded['studios'].isin(top_studios)]
 
     avg_ratings = (
-        filtered.groupby('directors')['rating']
+        filtered.groupby('studios')['rating']
         .mean()
-        .reindex(top_directors)
+        .reindex(top_studios)
     )
 
     film_counts = (
-        filtered.groupby('directors')['rating']
+        filtered.groupby('studios')['rating']
         .count()
-        .reindex(top_directors)
+        .reindex(top_studios)
     )
 
     categories = avg_ratings.index.tolist()
@@ -38,17 +38,18 @@ def plot_director_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
         theta=categories,
         fill='toself',
         name='Average Rating',
-        line=dict(color=ORANGE),
+        line=dict(color=BLUE),
         marker=dict(size=6),
         customdata=[[cat, val, cnt] for cat, val, cnt in zip(categories, values, counts)],
-        hovertemplate="<span style='color:" + ORANGE + "'><b>director:</b></span> %{customdata[0]}<br>" +
-                      "<span style='color:" + ORANGE + "'><b>Average Rating:</b></span> %{customdata[1]:.2f}<br>" +
-                      "<span style='color:" + ORANGE + "'><b>Number of Films:</b></span> %{customdata[2]}<extra></extra>"
+        hovertemplate="<span style='color:" + BLUE + "'><b>Studio:</b></span> %{customdata[0]}<br>" +
+                      "<span style='color:" + BLUE + "'><b>Average Rating:</b></span> %{customdata[1]:.2f}<br>" +
+                      "<span style='color:" + BLUE + "'><b>Number of Films:</b></span> %{customdata[2]}<extra></extra>"
+
     ))
 
     fig.update_layout(
         title={
-            'text': "Average Ratings by Director",
+            'text': "Average Ratings by Studio",
             'font': {'size': 26},
             'x': 0.0,
             'xanchor': 'left'
@@ -81,4 +82,3 @@ def plot_director_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
     )
 
     return fig
-    
