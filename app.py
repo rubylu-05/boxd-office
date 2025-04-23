@@ -22,6 +22,7 @@ from visualizations.actors.director_radar import plot_director_rating_radar
 from visualizations.studios.popular_studios import plot_popular_studios
 from visualizations.studios.studio_radar import plot_studio_rating_radar
 from visualizations.languages.popular_languages import plot_popular_languages
+from visualizations.languages.countries_map import plot_popular_countries_map
 from theme import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
@@ -210,3 +211,4 @@ if 'films_df' in st.session_state:
     # languages & countries
     st.markdown(f"<a name='languages-countries'></a><h2 style='color: {GREEN};'>Languages & Countries</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_languages(films_df), use_container_width=True)
+    st.plotly_chart(plot_popular_countries_map(films_df), use_container_width=True)
