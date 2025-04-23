@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import pandas as pd
 
 star_to_rating = {
     "★": 1,
@@ -59,9 +60,9 @@ def get_film_details(film_slug):
                     details['themes'].append(a.text)
         
         # get director
-        director_tag = soup.find('a', href=lambda x: x and '/director/' in x)
-        if director_tag:
-            details['director'] = director_tag.text
+        director_tags = soup.find_all('a', href=lambda x: x and '/director/' in x)
+        if director_tags:
+            details['director'] = [director.text.strip() for director in director_tags]
         
         # get cast
         actor_div = soup.find('div', id='tab-cast')
@@ -94,7 +95,7 @@ def get_film_details(film_slug):
     return film_slug, details
 
 
-def get_films(username, max_threads=10):
+def get_films(username, max_threads=20):
     base_url = f"https://letterboxd.com/{username}/films/by/date-earliest/"
     films = []
     film_slug_to_film = {}
@@ -145,5 +146,10 @@ def get_films(username, max_threads=10):
         film.update(details)
         film.pop('film_slug', None)
         final_data.append(film)
-
+    
+    df = pd.DataFrame(final_data)
+    df.to_csv('rubylu.csv', index=False)
+    
     return final_data
+
+get_films("rubylu")
