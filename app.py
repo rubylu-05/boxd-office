@@ -171,7 +171,9 @@ if 'films_df' in st.session_state:
     # diary
     films_diary_df = pd.read_csv('rubylu_diary.csv')
     st.markdown(f"<a name='genres-themes'></a><h2 style='color: {GREEN};'>Diary</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='font-weight: bold;'>Your Activity</h3>", unsafe_allow_html=True)
     st.plotly_chart(plot_diary_chart(films_diary_df), use_container_width=True)
+    st.divider()
 
     # genres & themes
     st.markdown(f"<a name='genres-themes'></a><h2 style='color: {GREEN};'>Genres & Themes</h2>", unsafe_allow_html=True)
