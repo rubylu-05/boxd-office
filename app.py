@@ -5,6 +5,7 @@ from visualizations.ratings.ratings_scatter import plot_ratings_scatter
 from visualizations.ratings.ratings_histogram import plot_ratings_histogram
 from visualizations.ratings.liked_pie import plot_liked_pie
 from visualizations.diary.diary_chart import plot_diary_chart
+from visualizations.diary.ratings_line import plot_rating_timeline
 from visualizations.genres.popular_genres import plot_popular_genres
 from visualizations.genres.genre_radar import plot_genre_rating_radar
 from visualizations.genres.popular_themes import plot_popular_themes
@@ -170,9 +171,11 @@ if 'films_df' in st.session_state:
     
     # diary
     films_diary_df = pd.read_csv('rubylu_diary.csv')
+    films_diary_df['date'] = pd.to_datetime(films_diary_df['date'], format='%d %b %Y').dt.normalize()
     st.markdown(f"<a name='genres-themes'></a><h2 style='color: {GREEN};'>Diary</h2>", unsafe_allow_html=True)
     st.markdown(f"<h3 style='font-weight: bold;'>Your Activity</h3>", unsafe_allow_html=True)
     st.plotly_chart(plot_diary_chart(films_diary_df), use_container_width=True)
+    st.plotly_chart(plot_rating_timeline(films_diary_df), use_container_width=True)
     st.divider()
 
     # genres & themes

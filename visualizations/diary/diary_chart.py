@@ -4,8 +4,6 @@ import plotly.graph_objects as go
 from utils import GRAY, GREEN
 
 def plot_diary_chart(diary_df: pd.DataFrame):
-    diary_df['date'] = pd.to_datetime(diary_df['date'], format='%d %b %Y').dt.normalize()
-
     # group by date: count and list of films
     diary_daily = diary_df.groupby('date').agg({
         'name': lambda x: ', '.join(x),
