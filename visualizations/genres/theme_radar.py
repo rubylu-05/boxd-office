@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import ORANGE, GRAY
+from utils import ORANGE, GRAY
 
 def plot_theme_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
     exploded = films_df.explode('themes')

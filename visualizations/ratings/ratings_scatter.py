@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import BLUE, GRAY, DARK_GRAY
+from utils import BLUE, GRAY, DARK_GRAY
 
 def plot_ratings_scatter(films_df: pd.DataFrame, selected_genres=None):
     # drop films without both ratings

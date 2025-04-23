@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import BLUE, GRAY
+from utils import BLUE, GRAY
 
 def plot_studio_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
     exploded = films_df.explode('studios')

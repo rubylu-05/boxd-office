@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import BLUE, GRAY
+from utils import BLUE, GRAY
 
 def plot_members_histogram(films_df: pd.DataFrame):
     # filter films that have num_watched data

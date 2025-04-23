@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import ORANGE, GRAY
+from utils import ORANGE, GRAY
 
 def plot_liked_histogram(films_df: pd.DataFrame):
     # filter films that have num_liked data

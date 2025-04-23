@@ -1,8 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import numpy as np
-from theme import ORANGE, GRAY
-from utils import format_with_linebreaks
+from utils import format_with_linebreaks, ORANGE, GRAY
 
 def plot_popular_countries_map(films_df: pd.DataFrame):
     exploded = films_df.explode('countries')

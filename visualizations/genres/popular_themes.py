@@ -1,7 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import ORANGE, GRAY
-from utils import format_with_linebreaks
+from utils import format_with_linebreaks, ORANGE, GRAY
 
 def plot_popular_themes(films_df: pd.DataFrame):
     exploded = films_df.explode('themes')

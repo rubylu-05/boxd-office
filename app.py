@@ -23,7 +23,7 @@ from visualizations.studios.popular_studios import plot_popular_studios
 from visualizations.studios.studio_radar import plot_studio_rating_radar
 from visualizations.languages.popular_languages import plot_popular_languages
 from visualizations.languages.countries_map import plot_popular_countries_map
-from theme import ORANGE, GREEN, BLUE
+from utils import ORANGE, GREEN, BLUE
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 
@@ -111,8 +111,8 @@ if 'films_df' in st.session_state:
                     <a href="#likes-ratings">Likes & Ratings</a>
                     <a href="#genres-themes">Genres & Themes</a>
                     <a href="#decades">Decades</a>
-                    <a href="#runtime">Runtime</a>
                     <a href="#obscurity">Obscurity</a>
+                    <a href="#runtime">Runtime</a>
                     <a href="#actors-directors">Actors & Directors</a>
                     <a href="#studios">Studios</a>
                     <a href="#languages-countries">Languages & Countries</a>
@@ -182,17 +182,17 @@ if 'films_df' in st.session_state:
     st.plotly_chart(plot_yearly_average_ratings(films_df), use_container_width=True)
     st.divider()
 
-    # runtime
-    st.markdown(f"<a name='runtime'></a><h2 style='color: {GREEN};'>Runtime</h2>", unsafe_allow_html=True)
-    st.plotly_chart(plot_runtime_histogram(films_df), use_container_width=True)
-    st.plotly_chart(plot_runtime_scatter(films_df), use_container_width=True)
-    st.divider()
-
     # obscurity
     st.markdown(f"<a name='obscurity'></a><h2 style='color: {GREEN};'>Obscurity</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_members_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_liked_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_avg_rating_distribution(films_df), use_container_width=True)
+    st.divider()
+    
+    # runtime
+    st.markdown(f"<a name='runtime'></a><h2 style='color: {GREEN};'>Runtime</h2>", unsafe_allow_html=True)
+    st.plotly_chart(plot_runtime_histogram(films_df), use_container_width=True)
+    st.plotly_chart(plot_runtime_scatter(films_df), use_container_width=True)
     st.divider()
     
     # actors & directors

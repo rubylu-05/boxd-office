@@ -1,3 +1,9 @@
+ORANGE = "#ff8000"
+GREEN = "#00e054"
+BLUE = "#40bbf4"
+GRAY = "#202831"
+DARK_GRAY = "#15191e"
+
 def format_with_linebreaks(items, max_line_length=100):
     lines = []
     current_line = ""

@@ -1,7 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import BLUE, GRAY
-from utils import format_with_linebreaks
+from utils import format_with_linebreaks, BLUE, GRAY
 
 def plot_popular_decades(films_df: pd.DataFrame):
     films_df = films_df.dropna(subset=['year'])
