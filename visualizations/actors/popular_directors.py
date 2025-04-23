@@ -1,19 +1,22 @@
 import pandas as pd
 import plotly.graph_objects as go
-from theme import ORANGE, GRAY
+from theme import BLUE, GRAY
 from utils import format_with_linebreaks
 
 def plot_popular_directors(films_df: pd.DataFrame):
-    films_df = films_df.copy()
-    films_df = films_df.dropna(subset=['director'])
 
-    director_counts = films_df.groupby('director').size().reset_index(name='total')
-    liked_counts = films_df[films_df['liked']].groupby('director').size().reset_index(name='liked')
-    director_data = pd.merge(director_counts, liked_counts, on='director', how='left').fillna(0)
+    exploded = films_df.explode('directors')
+    exploded = exploded.dropna(subset=['directors'])
+
+    director_counts = exploded.groupby('directors').size().reset_index(name='total')
+    liked_counts = exploded[exploded['liked']].groupby('directors').size().reset_index(name='liked')
+    director_data = pd.merge(director_counts, liked_counts, on='directors', how='left').fillna(0)
     director_data['liked'] = director_data['liked'].astype(int)
     director_data['unliked'] = director_data['total'] - director_data['liked']
 
-    director_examples = films_df.groupby('director').apply(
+    director_data.rename(columns={'directors': 'director'}, inplace=True)
+
+    director_examples = exploded.groupby('directors').apply(
         lambda x: x.nlargest(3, 'num_watched')['title'].tolist()
     )
 
@@ -25,10 +28,10 @@ def plot_popular_directors(films_df: pd.DataFrame):
 
     director_data['hover_text'] = director_data.apply(
         lambda row: (
-            f"<span style='color:{ORANGE}'><b>Number of Films:</b></span> {row['total']}<br>" +
-            f"<span style='color:{ORANGE}'><b>Liked:</b></span> {row['liked']} "
+            f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {row['total']}<br>" +
+            f"<span style='color:{BLUE}'><b>Liked:</b></span> {row['liked']} "
             f"({round(100 * row['liked'] / row['total'])}%)<br>" +
-            f"<span style='color:{ORANGE}'><b>Examples:</b></span> {format_with_linebreaks(row['examples'])}"
+            f"<span style='color:{BLUE}'><b>Examples:</b></span> {format_with_linebreaks(row['examples'])}"
         ),
         axis=1
     )
@@ -52,7 +55,7 @@ def plot_popular_directors(films_df: pd.DataFrame):
         x=director_data['liked'],
         name='Liked',
         orientation='h',
-        marker_color=ORANGE,
+        marker_color=BLUE,
         customdata=director_data[['hover_text']],
         hovertemplate="%{customdata[0]}<extra></extra>"
     ))
@@ -61,7 +64,7 @@ def plot_popular_directors(films_df: pd.DataFrame):
         barmode='stack',
         title={
             'text': "Most Watched Directors",
-            'font': {'size': 26, 'color': ORANGE},
+            'font': {'size': 26, 'color': BLUE},
             'x': 0.0,
             'xanchor': 'left'
         },
@@ -77,7 +80,7 @@ def plot_popular_directors(films_df: pd.DataFrame):
             dtick=2
         ),
         yaxis=dict(
-            title='Director',
+            title='Directors',
             title_font=dict(size=16, weight='bold'),
         ),
         height=600,

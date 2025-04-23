@@ -4,10 +4,6 @@ from theme import BLUE, GRAY
 from utils import format_with_linebreaks
 
 def plot_popular_actors(films_df: pd.DataFrame):
-    # keep only the first 12 actors from each cast list
-    films_df = films_df.copy()
-    films_df['cast'] = films_df['cast'].apply(lambda x: x[:12] if isinstance(x, list) else x)
-
     exploded = films_df.explode('cast')
     exploded = exploded.dropna(subset=['cast'])
 

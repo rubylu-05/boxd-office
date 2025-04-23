@@ -29,7 +29,7 @@ def get_film_details(film_slug):
         'runtime': None,
         'genres': [],
         'themes': [],
-        'director': None,
+        'directors': [],
         'cast': []
     }
 
@@ -58,16 +58,17 @@ def get_film_details(film_slug):
                     details['genres'].append(a.text)
                 elif '/films/theme/' in href or '/films/mini-theme/' in href:
                     details['themes'].append(a.text)
-        
+            
         # get director
-        director_tags = soup.find_all('a', href=lambda x: x and '/director/' in x)
-        if director_tags:
-            details['director'] = [director.text.strip() for director in director_tags]
+        director_div = soup.find('div', id='tab-crew')
+        if director_div:
+            details['directors'] = [a.text for a in director_div.find_all('a', href=lambda x: x and '/director/' in x)]
         
-        # get cast
+        # get cast (limit to first 12 actors)
         actor_div = soup.find('div', id='tab-cast')
         if actor_div:
-            details['cast'] = [a.text for a in actor_div.find_all('a', href=lambda x: x and '/actor/' in x)]
+            actor_links = actor_div.find_all('a', href=lambda x: x and '/actor/' in x)
+            details['cast'] = [a.text for a in actor_links[:12]]
 
         # get average rating
         ratings_url = f"https://letterboxd.com/csi/film/{film_slug}/rating-histogram/"
