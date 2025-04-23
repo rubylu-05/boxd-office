@@ -102,7 +102,7 @@ def plot_director_rating_radar(films_df: pd.DataFrame, top_n: int = 18):
             font=dict(color='white')
         ),
         height=600,
-        margin=dict(t=80)
+        margin=dict(t=80, b=100, l=100, r=100)
     )
 
     return fig
