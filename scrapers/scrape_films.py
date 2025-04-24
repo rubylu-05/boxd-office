@@ -18,13 +18,11 @@ star_to_rating = {
     None: None
 }
 
-def get_films(username, max_threads=10):
+def get_films(username, max_threads=12):
     base_url = f"https://letterboxd.com/{username}/films/by/date-earliest/"
     films = []
     film_slug_to_film = {}
     page = 1
-
-    print(f"Starting to scrape films for user: {username}")
     
     while True:
         url = f"{base_url}page/{page}/" if page > 1 else base_url
@@ -56,7 +54,6 @@ def get_films(username, max_threads=10):
         page += 1
 
     film_details_map = {}
-    print(f"\nFound {len(films)} films total. Now getting details...\n")
 
     with ThreadPoolExecutor(max_workers=max_threads) as executor:
         futures = {executor.submit(get_film_details, film['film_slug']): film['film_slug'] for film in films}
@@ -64,7 +61,6 @@ def get_films(username, max_threads=10):
             slug, details = future.result()
             film_details_map[slug] = details
             title = next((f['title'] for f in films if f['film_slug'] == slug), "Unknown Title")
-            print(f"Processed details for: {title}")
 
     # preserve original order
     final_data = []
@@ -73,6 +69,5 @@ def get_films(username, max_threads=10):
         details = film_details_map.get(slug, {})
         film.update(details)
         final_data.append(film)
-    print("\nDone!")
     
     return final_data

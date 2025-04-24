@@ -58,7 +58,7 @@ if 'films_df' not in st.session_state:
             if not username:
                 st.error("Please enter a valid Letterboxd username")
             else:
-                with st.spinner("Loading your films..."):
+                with st.spinner("Loading your films... Hang tight! This could take a few minutes if you've watched a lot of films."):
                     try:
                         # scrape films data
                         films_data = get_films(username)
