@@ -26,22 +26,25 @@ from visualizations.studios.studio_radar import plot_studio_rating_radar
 from visualizations.languages.popular_languages import plot_popular_languages
 from visualizations.languages.countries_map import plot_popular_countries_map
 from utils import ORANGE, GREEN, BLUE
+from scrapers.scrape_films import get_films
+from scrapers.scrape_diary import get_diary_entries
 
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 
 st.set_page_config(page_title="Boxd Office", page_icon="🍿", layout="centered")
 
-# main app
-def load_data(username):
-    films_df = pd.read_csv('rubylu.csv')
-    for col in ['genres', 'themes', 'cast', 'directors', 'studios', 'countries']:
-        films_df[col] = films_df[col].apply(eval)
-    return films_df
-
-def load_diary_data():
-    diary_df = pd.read_csv('rubylu_diary.csv')
-    diary_df['date'] = pd.to_datetime(diary_df['date'], format='%d %b %Y').dt.normalize()
+def process_diary_data(diary_entries):
+    diary_df = pd.DataFrame(diary_entries)
+    diary_df['date'] = pd.to_datetime(diary_df['date'], format='%d %b %Y', errors='coerce').dt.normalize()
+    diary_df['year'] = pd.to_numeric(diary_df['year'], errors='coerce')
     return diary_df
+
+def process_film_data(films_data):
+    films_df = pd.DataFrame(films_data)
+    for col in ['genres', 'themes', 'cast', 'directors', 'studios', 'countries']:
+        films_df[col] = films_df[col].apply(lambda x: x if isinstance(x, list) else [])
+    films_df['year'] = pd.to_numeric(films_df['year'], errors='coerce')
+    return films_df
 
 st.markdown(f"<div id='home' style='font-size: 4.5em; font-weight: bold;'><span style='color: {ORANGE};'>Boxd</span>·<span style='color: {GREEN};'>Office</span></div>", unsafe_allow_html=True)
 st.write("Visualize your Letterboxd film data!")
@@ -57,8 +60,18 @@ if 'films_df' not in st.session_state:
             else:
                 with st.spinner("Loading your films..."):
                     try:
-                        st.session_state['films_df'] = load_data(username)
-                        st.session_state['diary_df'] = load_diary_data()
+                        # scrape films data
+                        films_data = get_films(username)
+                        films_df = process_film_data(films_data)
+                        
+                        # scrape diary data
+                        diary_entries = get_diary_entries(username)
+                        diary_df = process_diary_data(diary_entries)
+                        
+                        # store in session state
+                        st.session_state['films_df'] = films_df
+                        st.session_state['diary_df'] = diary_df
+                        st.session_state['username'] = username
                         st.success("Data loaded successfully!")
                     except Exception as e:
                         st.error(f"Failed to load data: {e}")
@@ -67,9 +80,10 @@ if 'films_df' not in st.session_state:
 if 'films_df' in st.session_state and 'diary_df' in st.session_state:
     films_df = st.session_state['films_df']
     diary_df = st.session_state['diary_df']
+    username = st.session_state['username']
 
     films_df['decade'] = (films_df['year'] // 10) * 10
-    diary_df['decade'] = (diary_df['year'] // 10) * 10  # Add decade column to diary_df
+    diary_df['decade'] = (diary_df['year'] // 10) * 10
 
     # render sidebar only after data is loaded
     with st.sidebar:
@@ -115,7 +129,7 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
             }}
 
             #home {{
-                scroll-margin-top: 70px;  /* Adjust this value to your desired offset */
+                scroll-margin-top: 70px;
             }}
             </style>
 
@@ -138,13 +152,13 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
         """, unsafe_allow_html=True)
 
     csv = films_df.to_csv(index=False).encode('utf-8')
-    st.download_button("Download Data as CSV", data=csv, file_name='letterboxd_data.csv', mime='text/csv')
+    st.download_button("Download Data as CSV", data=csv, file_name=f'{username}_letterboxd_data.csv', mime='text/csv')
     
-    all_decades = sorted(pd.read_csv('rubylu.csv')['year'].apply(lambda x: (x // 10) * 10).unique())
-    decades_labels = [f"{d}s" for d in all_decades]
+    all_decades = sorted(films_df['decade'].dropna().unique())
+    decades_labels = [f"{int(d)}s" for d in all_decades]
     selected_decades = st.multiselect("Filter by decade:", decades_labels)
 
-    all_genres = sorted({g for genres in pd.read_csv('rubylu.csv')['genres'].apply(eval) for g in genres})
+    all_genres = sorted({g for genres in films_df['genres'] for g in genres})
     selected_genres = st.multiselect("Filter by genre:", all_genres)
     
     st.write("These filters would be applied to every section. You can change this anytime.")
@@ -177,7 +191,7 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
             direction = "higher" if row['rating'] > row['avg_rating'] else "lower"
             diff = round(abs(row['rating'] - row['avg_rating']), 2)
             st.markdown(f"""
-                You rated <span style='font-style: italic;'>{row['title']} ({row['year']})</span> 
+                You rated <span style='font-style: italic;'>{row['title']} ({int(row['year'])})</span> 
                 <span style='font-weight: bold; color: {BLUE};'>{diff} {direction}</span> than the average Letterboxd user.
             """, unsafe_allow_html=True)
     else:
@@ -196,7 +210,6 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
     st.plotly_chart(plot_popular_genres(films_df), use_container_width=True)
     st.plotly_chart(plot_genre_rating_radar(films_df), use_container_width=True)
     st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
-    # st.plotly_chart(plot_theme_rating_radar(films_df), use_container_width=True)
     st.divider()
 
     # decades
@@ -216,7 +229,6 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
     # runtime
     st.markdown(f"<a name='runtime'></a><h2 style='color: {GREEN};'>Runtime</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_runtime_histogram(films_df), use_container_width=True)
-    # st.plotly_chart(plot_runtime_scatter(films_df), use_container_width=True)
     st.divider()
 
     # actors
