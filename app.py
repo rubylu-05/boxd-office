@@ -146,11 +146,12 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
     all_genres = sorted({g for genres in pd.read_csv('rubylu.csv')['genres'].apply(eval) for g in genres})
     selected_genres = st.multiselect("Filter by genre:", all_genres)
     
-    # Apply filters to films_df
+    st.write("These filters would be applied to every section. You can change this anytime.")
+    
     if selected_decades:
         selected_decade_values = [int(d[:-1]) for d in selected_decades]
         films_df = films_df[films_df['decade'].isin(selected_decade_values)]
-        diary_df = diary_df[diary_df['decade'].isin(selected_decade_values)]  # Apply to diary_df
+        diary_df = diary_df[diary_df['decade'].isin(selected_decade_values)]
 
     if selected_genres:
         films_df = films_df[films_df['genres'].apply(lambda genres: any(g in genres for g in selected_genres))]

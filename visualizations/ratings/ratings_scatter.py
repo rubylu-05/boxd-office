@@ -12,7 +12,7 @@ def plot_ratings_scatter(films_df: pd.DataFrame, selected_genres=None):
         lambda row: (
             f"<span style='color:{BLUE}'><b>Film:</b></span> {row['title']} ({row['year'] or 'N/A'})<br>"
             f"<span style='color:{BLUE}'><b>Your Rating:</b></span> {row['rating']}<br>"
-            f"<span style='color:{BLUE}'><b>Avg Rating:</b></span> {row['avg_rating']}<br>"
+            f"<span style='color:{BLUE}'><b>Average Rating:</b></span> {row['avg_rating']}<br>"
         ),
         axis=1
     )

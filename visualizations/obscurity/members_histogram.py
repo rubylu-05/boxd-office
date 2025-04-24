@@ -1,22 +1,60 @@
 import pandas as pd
 import plotly.graph_objects as go
-from utils import BLUE, GRAY
+from utils import format_with_linebreaks, BLUE, GRAY
+
+def format_number(num):
+    if num >= 1_000_000:
+        return f"{num/1_000_000:.1f}m"
+    elif num >= 1_000:
+        return f"{num/1_000:.1f}k"
+    return str(int(num))
 
 def plot_members_histogram(films_df: pd.DataFrame):
-    # filter films that have num_watched data
     df = films_df.dropna(subset=['num_watched'])
+    
+    counts, bin_edges = pd.cut(df['num_watched'], bins=40, retbins=True)
+    bin_ranges = [
+        f"{format_number(bin_edges[i])} - {format_number(bin_edges[i+1])}"
+        for i in range(len(bin_edges)-1)
+    ]
+    
+    df['bin'] = pd.cut(df['num_watched'], bins=bin_edges)
+    bin_examples = df.groupby('bin').apply(
+        lambda x: x.nlargest(3, 'num_watched')['title'].tolist()
+    )
+    bin_examples = bin_examples.reindex(df['bin'].cat.categories)
 
+    bin_counts = df['bin'].value_counts().sort_index()
+
+    hover_texts = []
+    for i in range(len(bin_ranges)):
+        examples = bin_examples.iloc[i] if i < len(bin_examples) else []
+        count = bin_counts.iloc[i] if i < len(bin_counts) else 0
+
+        hover_text = (
+            f"<span style='color:{BLUE}'><b>People Watched:</b></span> {bin_ranges[i]}<br>"
+            f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {format_number(count)}<br>"
+            f"<span style='color:{BLUE}'><b>Examples:</b></span> {format_with_linebreaks(examples)}"
+        )
+        hover_texts.append(hover_text)
+    
     fig = go.Figure()
-
+    
     fig.add_trace(go.Histogram(
         x=df['num_watched'],
-        nbinsx=40,  # auto-binned into 40 bins
+        xbins=dict(
+            start=bin_edges[0],
+            end=bin_edges[-1],
+            size=(bin_edges[-1] - bin_edges[0])/40
+        ),
         marker=dict(
             color=BLUE,
         ),
         name='Popularity Distribution',
+        customdata=hover_texts,
+        hovertemplate="%{customdata}<extra></extra>"
     ))
-
+    
     fig.update_layout(
         title={
             'text': "Film Popularity Distribution",
@@ -49,5 +87,5 @@ def plot_members_histogram(films_df: pd.DataFrame):
         margin=dict(t=80, b=20),
         bargap=0.05
     )
-
+    
     return fig

@@ -1,12 +1,39 @@
 import pandas as pd
 import plotly.graph_objects as go
-from utils import BLUE, GRAY
+from utils import format_with_linebreaks, BLUE, GRAY
 
 def plot_runtime_histogram(films_df: pd.DataFrame):
-    # filter films that have runtimes
     df = films_df.dropna(subset=['runtime'])
 
     df = df[(df['runtime'] >= 20) & (df['runtime'] <= 300)]
+
+    bin_edges = list(range(20, 301, 10))
+    bin_ranges = [
+        f"{bin_edges[i]} - {bin_edges[i+1]}"
+        for i in range(len(bin_edges)-1)
+    ]
+
+    df['bin'] = pd.cut(df['runtime'], bins=bin_edges, right=False)
+    
+    bin_counts = df['bin'].value_counts().sort_index()
+    
+    bin_examples = df.groupby('bin').apply(
+        lambda x: x.nlargest(3, 'num_watched')['title'].tolist()
+    )
+    bin_examples = bin_examples.reindex(df['bin'].cat.categories, fill_value=[])
+
+    hover_texts = []
+    for i, bin_range in enumerate(bin_ranges):
+        count = bin_counts.get(df['bin'].cat.categories[i], 0)
+        
+        examples = bin_examples.get(df['bin'].cat.categories[i], [])
+        
+        hover_text = (
+            f"<span style='color:{BLUE}'><b>Runtime:</b></span> {bin_range}<br>"
+            f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {count}<br>"
+            f"<span style='color:{BLUE}'><b>Examples:</b></span> {format_with_linebreaks(examples)}"
+        )
+        hover_texts.append(hover_text)
 
     fig = go.Figure()
 
@@ -15,12 +42,14 @@ def plot_runtime_histogram(films_df: pd.DataFrame):
         xbins=dict(
             start=20,
             end=300,
-            size=10  # 10-minute bins
+            size=10
         ),
         marker=dict(
             color=BLUE,
         ),
         name='Runtime Distribution',
+        customdata=hover_texts,
+        hovertemplate="%{customdata}<extra></extra>"
     ))
 
     fig.update_layout(

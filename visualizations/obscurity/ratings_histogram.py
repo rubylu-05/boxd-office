@@ -1,24 +1,51 @@
 import pandas as pd
 import plotly.graph_objects as go
-from utils import BLUE, GRAY
+from utils import format_with_linebreaks, BLUE, GRAY
 
 def plot_avg_rating_distribution(films_df: pd.DataFrame):
-    # filter films that have average rating data
     df = films_df.dropna(subset=['avg_rating'])
+
+    counts, bin_edges = pd.cut(df['avg_rating'], bins=25, retbins=True)
+    bin_ranges = [
+        f"{bin_edges[i]:.1f} - {bin_edges[i+1]:.1f}"
+        for i in range(len(bin_edges)-1)
+    ]
+
+    df['bin'] = pd.cut(df['avg_rating'], bins=bin_edges)
+    bin_examples = df.groupby('bin').apply(
+        lambda x: x.nlargest(3, 'num_watched')['title'].tolist()
+    )
+    bin_examples = bin_examples.reindex(df['bin'].cat.categories)
+
+    bin_counts = df['bin'].value_counts().sort_index()
+
+    hover_texts = []
+    for i in range(len(bin_ranges)):
+        examples = bin_examples.iloc[i] if i < len(bin_examples) else []
+        count = bin_counts.iloc[i] if i < len(bin_counts) else 0
+
+        hover_text = (
+            f"<span style='color:{BLUE}'><b>Average Rating:</b></span> {bin_ranges[i]}<br>"
+            f"<span style='color:{BLUE}'><b>Number of Films:</b></span> {count}<br>"
+            f"<span style='color:{BLUE}'><b>Examples:</b></span> {format_with_linebreaks(examples)}"
+        )
+        hover_texts.append(hover_text)
 
     fig = go.Figure()
 
     fig.add_trace(go.Histogram(
         x=df['avg_rating'],
         xbins=dict(
-            start=0,
-            end=5,
-            size=0.2  # bin size
+            start=bin_edges[0],
+            end=bin_edges[-1],
+            size=(bin_edges[-1] - bin_edges[0])/25
         ),
         marker=dict(
             color=BLUE,
         ),
         name='Average Rating Distribution',
+        customdata=hover_texts,
+        hovertemplate="%{customdata}<extra></extra>"
     ))
 
     fig.update_layout(

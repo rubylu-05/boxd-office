@@ -1,20 +1,59 @@
 import pandas as pd
 import plotly.graph_objects as go
-from utils import ORANGE, GRAY
+from utils import format_with_linebreaks, ORANGE, GRAY
+
+def format_number(num):
+    """Format numbers to use k for thousands, m for millions, etc."""
+    if num >= 1_000_000:
+        return f"{num/1_000_000:.1f}m"
+    elif num >= 1_000:
+        return f"{num/1_000:.1f}k"
+    return str(int(num))
 
 def plot_liked_histogram(films_df: pd.DataFrame):
-    # filter films that have num_liked data
     df = films_df.dropna(subset=['num_liked'])
+
+    counts, bin_edges = pd.cut(df['num_liked'], bins=40, retbins=True)
+    bin_ranges = [
+        f"{format_number(bin_edges[i])} - {format_number(bin_edges[i+1])}"
+        for i in range(len(bin_edges)-1)
+    ]
+
+    df['bin'] = pd.cut(df['num_liked'], bins=bin_edges)
+    bin_examples = df.groupby('bin').apply(
+        lambda x: x.nlargest(3, 'num_liked')['title'].tolist()
+    )
+    bin_examples = bin_examples.reindex(df['bin'].cat.categories)
+
+    bin_counts = df['bin'].value_counts().sort_index()
+
+    hover_texts = []
+    for i in range(len(bin_ranges)):
+        examples = bin_examples.iloc[i] if i < len(bin_examples) else []
+        count = bin_counts.iloc[i] if i < len(bin_counts) else 0
+
+        hover_text = (
+            f"<span style='color:{ORANGE}'><b>Number of Likes:</b></span> {bin_ranges[i]}<br>"
+            f"<span style='color:{ORANGE}'><b>Number of Films:</b></span> {format_number(count)}<br>"
+            f"<span style='color:{ORANGE}'><b>Examples:</b></span> {format_with_linebreaks(examples)}"
+        )
+        hover_texts.append(hover_text)
 
     fig = go.Figure()
 
     fig.add_trace(go.Histogram(
         x=df['num_liked'],
-        nbinsx=40,  # auto-binned into 40 bins
+        xbins=dict(
+            start=bin_edges[0],
+            end=bin_edges[-1],
+            size=(bin_edges[-1] - bin_edges[0]) / 40
+        ),
         marker=dict(
             color=ORANGE,
         ),
         name='Like Distribution',
+        customdata=hover_texts,
+        hovertemplate="%{customdata}<extra></extra>"
     ))
 
     fig.update_layout(
