@@ -12,7 +12,7 @@ def plot_avg_rating_distribution(films_df: pd.DataFrame):
     ]
 
     df['bin'] = pd.cut(df['avg_rating'], bins=bin_edges)
-    bin_examples = df.groupby('bin').apply(
+    bin_examples = df.groupby('bin', observed=False).apply(
         lambda x: x.nlargest(3, 'num_watched')['title'].tolist()
     )
     bin_examples = bin_examples.reindex(df['bin'].cat.categories)
