@@ -19,8 +19,8 @@ from visualizations.obscurity.members_histogram import plot_members_histogram
 from visualizations.obscurity.liked_histogram import plot_liked_histogram
 from visualizations.obscurity.ratings_histogram import plot_avg_rating_distribution
 from visualizations.actors.popular_actors import plot_popular_actors
-from visualizations.actors.popular_directors import plot_popular_directors
-from visualizations.actors.director_radar import plot_director_rating_radar
+from visualizations.directors.popular_directors import plot_popular_directors
+from visualizations.directors.director_radar import plot_director_rating_radar
 from visualizations.studios.popular_studios import plot_popular_studios
 from visualizations.studios.studio_radar import plot_studio_rating_radar
 from visualizations.languages.popular_languages import plot_popular_languages
@@ -128,7 +128,8 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
                     <a href="#decades">Decades</a>
                     <a href="#obscurity">Obscurity</a>
                     <a href="#runtime">Runtime</a>
-                    <a href="#actors-directors">Actors & Directors</a>
+                    <a href="#actors">Actors</a>
+                    <a href="#directors">Directors</a>
                     <a href="#studios">Studios</a>
                     <a href="#languages-countries">Languages & Countries</a>
                     <a href="#home" style='color: {GREEN}; font-style: italic'>Back to top</a>
@@ -193,8 +194,8 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
     # genres & themes
     st.markdown(f"<a name='genres-themes'></a><h2 style='color: {GREEN};'>Genres & Themes</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_genres(films_df), use_container_width=True)
-    st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
     st.plotly_chart(plot_genre_rating_radar(films_df), use_container_width=True)
+    st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
     # st.plotly_chart(plot_theme_rating_radar(films_df), use_container_width=True)
     st.divider()
 
@@ -218,9 +219,13 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
     # st.plotly_chart(plot_runtime_scatter(films_df), use_container_width=True)
     st.divider()
 
-    # actors & directors
-    st.markdown(f"<a name='actors-directors'></a><h2 style='color: {GREEN};'>Actors & Directors</h2>", unsafe_allow_html=True)
+    # actors
+    st.markdown(f"<a name='actors'></a><h2 style='color: {GREEN};'>Actors</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_actors(films_df), use_container_width=True)
+    st.divider()
+    
+    # directors
+    st.markdown(f"<a name='directors'></a><h2 style='color: {GREEN};'>Directors</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_directors(films_df), use_container_width=True)
     st.plotly_chart(plot_director_rating_radar(films_df), use_container_width=True)
     st.divider()
