@@ -188,6 +188,7 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
     st.markdown(f"<h3 style='font-weight: bold;'>Your Activity</h3>", unsafe_allow_html=True)
     st.plotly_chart(plot_diary_chart(diary_df), use_container_width=True)
     st.plotly_chart(plot_rating_timeline(diary_df), use_container_width=True)
+    st.divider()
 
     # genres & themes
     st.markdown(f"<a name='genres-themes'></a><h2 style='color: {GREEN};'>Genres & Themes</h2>", unsafe_allow_html=True)
@@ -195,34 +196,40 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
     st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
     st.plotly_chart(plot_genre_rating_radar(films_df), use_container_width=True)
     # st.plotly_chart(plot_theme_rating_radar(films_df), use_container_width=True)
+    st.divider()
 
     # decades
     st.markdown(f"<a name='decades'></a><h2 style='color: {GREEN};'>Decades</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_decades(films_df), use_container_width=True)
     st.plotly_chart(plot_decades_rating_radar(films_df), use_container_width=True)
     st.plotly_chart(plot_yearly_average_ratings(films_df), use_container_width=True)
+    st.divider()
 
     # obscurity
     st.markdown(f"<a name='obscurity'></a><h2 style='color: {GREEN};'>Obscurity</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_members_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_liked_histogram(films_df), use_container_width=True)
     st.plotly_chart(plot_avg_rating_distribution(films_df), use_container_width=True)
+    st.divider()
 
     # runtime
     st.markdown(f"<a name='runtime'></a><h2 style='color: {GREEN};'>Runtime</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_runtime_histogram(films_df), use_container_width=True)
-    st.plotly_chart(plot_runtime_scatter(films_df), use_container_width=True)
+    # st.plotly_chart(plot_runtime_scatter(films_df), use_container_width=True)
+    st.divider()
 
     # actors & directors
     st.markdown(f"<a name='actors-directors'></a><h2 style='color: {GREEN};'>Actors & Directors</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_actors(films_df), use_container_width=True)
     st.plotly_chart(plot_popular_directors(films_df), use_container_width=True)
     st.plotly_chart(plot_director_rating_radar(films_df), use_container_width=True)
+    st.divider()
 
     # studios
     st.markdown(f"<a name='studios'></a><h2 style='color: {GREEN};'>Studios</h2>", unsafe_allow_html=True)
     st.plotly_chart(plot_popular_studios(films_df), use_container_width=True)
     st.plotly_chart(plot_studio_rating_radar(films_df), use_container_width=True)
+    st.divider()
 
     # languages & countries
     st.markdown(f"<a name='languages-countries'></a><h2 style='color: {GREEN};'>Languages & Countries</h2>", unsafe_allow_html=True)

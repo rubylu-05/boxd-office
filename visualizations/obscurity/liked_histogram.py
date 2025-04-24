@@ -1,14 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from utils import format_with_linebreaks, ORANGE, GRAY
-
-def format_number(num):
-    """Format numbers to use k for thousands, m for millions, etc."""
-    if num >= 1_000_000:
-        return f"{num/1_000_000:.1f}m"
-    elif num >= 1_000:
-        return f"{num/1_000:.1f}k"
-    return str(int(num))
+from utils import format_with_linebreaks, format_number, ORANGE, GRAY
 
 def plot_liked_histogram(films_df: pd.DataFrame):
     df = films_df.dropna(subset=['num_liked'])

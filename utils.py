@@ -17,3 +17,10 @@ def format_with_linebreaks(items, max_line_length=100):
     if current_line:
         lines.append(current_line.rstrip())
     return "<br>".join(lines)
+
+def format_number(num):
+    if num >= 1_000_000:
+        return f"{num/1_000_000:.1f}m"
+    elif num >= 1_000:
+        return f"{num/1_000:.1f}k"
+    return str(int(num))
