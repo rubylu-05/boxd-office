@@ -2,7 +2,7 @@
 
 Visualize your Letterboxd profile data with interactive charts and insights!
 
-<img src="https://i.postimg.cc/VNQ14jdr/9-CF11-ECC-A6-FE-4950-A7-C7-D9-AB7-D52-A79-A-1-201-a.jpg" width="32%"/> <img src="https://i.postimg.cc/50fJWb5f/C31-D34-EC-DD08-49-E5-990-C-CCD0-FBF0-BFA4-1-201-a.jpg" width="32%"/> <img src="https://i.postimg.cc/W3Sv2CSg/6-D056696-54-B7-44-C8-B6-D0-785-FE940-B0-D3-1-201-a.jpg" width="32%"/>
+<img src="images/screenshot1.png" width="32%"/> <img src="images/screenshot2.png" width="32%"/> <img src="images/screenshot3.png" width="32%"/>
 
 ## How It Works
 
