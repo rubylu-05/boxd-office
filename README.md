@@ -50,10 +50,10 @@ Visit [boxdoffice.streamlit.app](https://boxdoffice.streamlit.app)
 
 ## Tech Stack
 **Backend**:  
-Python • Pandas • BeautifulSoup 
+Python • Pandas • Beautiful Soup 
 
 **Frontend & Visualizations**:  
 Streamlit • Plotly • CSS
 
-***
+##
 Thanks for reading :)
