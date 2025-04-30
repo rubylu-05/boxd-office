@@ -16,8 +16,9 @@ from visualizations.decades.year_ratings import plot_yearly_average_ratings
 from visualizations.runtime.runtime_histogram import plot_runtime_histogram
 from visualizations.runtime.runtime_scatter import plot_runtime_scatter
 from visualizations.obscurity.members_histogram import plot_members_histogram
-from visualizations.obscurity.liked_histogram import plot_liked_histogram
 from visualizations.obscurity.ratings_histogram import plot_avg_rating_distribution
+from visualizations.obscurity.liked_histogram import plot_liked_histogram
+from visualizations.obscurity.percent_liked_histogram import plot_percent_liked_histogram
 from visualizations.actors.popular_actors import plot_popular_actors
 from visualizations.directors.popular_directors import plot_popular_directors
 from visualizations.directors.director_radar import plot_director_rating_radar
@@ -32,14 +33,6 @@ from scrapers.scrape_diary import get_diary_entries
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 
 st.set_page_config(page_title="Boxd Office", page_icon="🍿", layout="centered")
-
-def safe_plot(plot_func, *args, **kwargs):
-    # handle plotting errors
-    try:
-        return plot_func(*args, **kwargs)
-    except Exception as e:
-        st.error("An unexpected error occurred here, sorry!")
-        return None
 
 def process_diary_data(diary_entries):
     diary_df = pd.DataFrame(diary_entries)
@@ -185,114 +178,80 @@ if 'films_df' in st.session_state and 'diary_df' in st.session_state:
     st.markdown(f"<a name='likes-ratings'></a><h2 style='color: {GREEN};'>Likes & Ratings</h2>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
-        fig = safe_plot(plot_ratings_histogram, films_df, selected_genres)
-        if fig: st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(plot_ratings_histogram(films_df, selected_genres), use_container_width=True)
     with col2:
-        fig = safe_plot(plot_liked_pie, films_df)
-        if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_ratings_scatter, films_df, selected_genres)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(plot_liked_pie(films_df), use_container_width=True)
+    st.plotly_chart(plot_ratings_scatter(films_df, selected_genres), use_container_width=True)
 
     st.markdown(f"<h3 style='font-weight: bold;'>Outliers</h3>", unsafe_allow_html=True)
-    try:
-        outliers_df = films_df.dropna(subset=['rating', 'avg_rating']).copy()
-        if not outliers_df.empty:
-            outliers_df['diff'] = (outliers_df['rating'] - outliers_df['avg_rating']).abs()
-            top_outliers = outliers_df.sort_values(by='diff', ascending=False).head(5)
-            for _, row in top_outliers.iterrows():
-                direction = "higher" if row['rating'] > row['avg_rating'] else "lower"
-                diff = round(abs(row['rating'] - row['avg_rating']), 2)
-                st.markdown(f"""
-                    You rated <span style='font-style: italic;'>{row['title']} ({int(row['year'])})</span> 
-                    <span style='font-weight: bold; color: {BLUE};'>{diff} {direction}</span> than the average Letterboxd user.
-                """, unsafe_allow_html=True)
-        else:
-            st.write("No outliers found for the selected genre(s).")
-    except Exception:
-        st.error("An unexpected error occurred here, sorry!")
+    outliers_df = films_df.dropna(subset=['rating', 'avg_rating']).copy()
+    if not outliers_df.empty:
+        outliers_df['diff'] = (outliers_df['rating'] - outliers_df['avg_rating']).abs()
+        top_outliers = outliers_df.sort_values(by='diff', ascending=False).head(5)
+        for _, row in top_outliers.iterrows():
+            direction = "higher" if row['rating'] > row['avg_rating'] else "lower"
+            diff = round(abs(row['rating'] - row['avg_rating']), 2)
+            st.markdown(f"""
+                You rated <span style='font-style: italic;'>{row['title']} ({int(row['year'])})</span> 
+                <span style='font-weight: bold; color: {BLUE};'>{diff} {direction}</span> than the average Letterboxd user.
+            """, unsafe_allow_html=True)
+    else:
+        st.write("No outliers found for the selected genre(s).")
     st.divider()
 
     # diary
     st.markdown(f"<a name='diary'></a><h2 style='color: {GREEN};'>Diary</h2>", unsafe_allow_html=True)
     st.markdown(f"<h3 style='font-weight: bold;'>Your Activity</h3>", unsafe_allow_html=True)
-    fig = safe_plot(plot_diary_chart, diary_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_rating_timeline, diary_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(plot_diary_chart(diary_df), use_container_width=True)
+    st.plotly_chart(plot_rating_timeline(diary_df), use_container_width=True)
     st.divider()
 
     # genres & themes
     st.markdown(f"<a name='genres-themes'></a><h2 style='color: {GREEN};'>Genres & Themes</h2>", unsafe_allow_html=True)
-    fig = safe_plot(plot_popular_genres, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_genre_rating_radar, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_popular_themes, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(plot_popular_genres(films_df), use_container_width=True)
+    st.plotly_chart(plot_genre_rating_radar(films_df), use_container_width=True)
+    st.plotly_chart(plot_popular_themes(films_df), use_container_width=True)
     st.divider()
 
     # decades
     st.markdown(f"<a name='decades'></a><h2 style='color: {GREEN};'>Decades</h2>", unsafe_allow_html=True)
-    fig = safe_plot(plot_popular_decades, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_decades_rating_radar, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_yearly_average_ratings, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(plot_popular_decades(films_df), use_container_width=True)
+    st.plotly_chart(plot_decades_rating_radar(films_df), use_container_width=True)
+    st.plotly_chart(plot_yearly_average_ratings(films_df), use_container_width=True)
     st.divider()
 
     # obscurity
     st.markdown(f"<a name='obscurity'></a><h2 style='color: {GREEN};'>Obscurity</h2>", unsafe_allow_html=True)
-    fig = safe_plot(plot_members_histogram, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(plot_members_histogram(films_df), use_container_width=True)
+    st.plotly_chart(plot_avg_rating_distribution(films_df), use_container_width=True)
+    st.plotly_chart(plot_liked_histogram(films_df), use_container_width=True)
+    st.plotly_chart(plot_percent_liked_histogram(films_df), use_container_width=True)
     
-    fig = safe_plot(plot_liked_histogram, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_avg_rating_distribution, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
     st.divider()
 
     # runtime
     st.markdown(f"<a name='runtime'></a><h2 style='color: {GREEN};'>Runtime</h2>", unsafe_allow_html=True)
-    fig = safe_plot(plot_runtime_histogram, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(plot_runtime_histogram(films_df), use_container_width=True)
     st.divider()
 
     # actors
     st.markdown(f"<a name='actors'></a><h2 style='color: {GREEN};'>Actors</h2>", unsafe_allow_html=True)
-    fig = safe_plot(plot_popular_actors, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(plot_popular_actors(films_df), use_container_width=True)
     st.divider()
     
     # directors
     st.markdown(f"<a name='directors'></a><h2 style='color: {GREEN};'>Directors</h2>", unsafe_allow_html=True)
-    fig = safe_plot(plot_popular_directors, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_director_rating_radar, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(plot_popular_directors(films_df), use_container_width=True)
+    st.plotly_chart(plot_director_rating_radar(films_df), use_container_width=True)
     st.divider()
 
     # studios
     st.markdown(f"<a name='studios'></a><h2 style='color: {GREEN};'>Studios</h2>", unsafe_allow_html=True)
-    fig = safe_plot(plot_popular_studios, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_studio_rating_radar, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(plot_popular_studios(films_df), use_container_width=True)
+    st.plotly_chart(plot_studio_rating_radar(films_df), use_container_width=True)
     st.divider()
 
     # languages & countries
     st.markdown(f"<a name='languages-countries'></a><h2 style='color: {GREEN};'>Languages & Countries</h2>", unsafe_allow_html=True)
-    fig = safe_plot(plot_popular_languages, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
-    
-    fig = safe_plot(plot_popular_countries_map, films_df)
-    if fig: st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(plot_popular_languages(films_df), use_container_width=True)
+    st.plotly_chart(plot_popular_countries_map(films_df), use_container_width=True)
