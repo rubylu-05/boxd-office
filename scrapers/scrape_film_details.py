@@ -67,16 +67,28 @@ def get_film_details(film_slug, session):
         if director_div:
             details['directors'] = [a.text.strip() for a in director_div.find_all('a', href=lambda x: x and '/director/' in x)]
 
-        # get cast
+        # get cast (first 12)
         actor_div = soup.find('div', id='tab-cast')
         if actor_div:
             details['cast'] = [a.text.strip() for a in actor_div.find_all('a', href=lambda x: x and '/actor/' in x)[:12]]
 
-        # get language
-        lang_header = soup.find('h3', string=lambda t: t and 'Language' in t)
-        if lang_header:
-            lang_link = lang_header.find_next_sibling('div').find('a')
-            details['language'] = lang_link.text.strip() if lang_link else None
+        details_div = soup.find('div', id='tab-details')
+        if details_div:
+            # get studios
+            studio_links = details_div.find_all('a', href=lambda x: x and '/studio/' in x)
+            details['studios'] = [link.text.strip() for link in studio_links]
+            
+            # get countries
+            country_links = details_div.find_all('a', href=lambda x: x and '/films/country/' in x)
+            details['countries'] = [link.text.strip() for link in country_links]
+
+            # get language
+            lang_header = details_div.find('h3', string=lambda t: t and ('Language' in t or 'Primary Language' in t))
+            if lang_header:
+                lang_block = lang_header.find_next_sibling('div')
+                if lang_block:
+                    lang_link = lang_block.find('a')
+                    details['language'] = lang_link.text.strip() if lang_link else None
 
         try:
             # get ratings
