@@ -11,6 +11,26 @@ def get_digits(text):
     except (ValueError, TypeError):
         return None
 
+def parse_stat_number(text):
+    # convert numbers like '2.1M' or '327K' to integers
+    if not text:
+        return None
+    text = text.strip()
+    multiplier = 1
+    if 'K' in text:
+        multiplier = 1000
+        text = text.replace('K', '')
+    elif 'M' in text:
+        multiplier = 1000000
+        text = text.replace('M', '')
+    
+    try:
+        if '.' in text:
+            return int(float(text) * multiplier)
+        return int(text) * multiplier
+    except (ValueError, TypeError):
+        return None
+
 def get_film_details(film_slug, session):
     details = {
         'avg_rating': None,
@@ -90,34 +110,32 @@ def get_film_details(film_slug, session):
                     lang_link = lang_block.find('a')
                     details['language'] = lang_link.text.strip() if lang_link else None
 
-        try:
-            # get ratings
-            ratings_url = f"https://letterboxd.com/csi/film/{film_slug}/rating-histogram/"
-            ratings_response = session.get(ratings_url, timeout=10)
-            if ratings_response.status_code == 200:
-                rating_tag = BeautifulSoup(ratings_response.text, 'html.parser').find('a', class_='display-rating')
-                if rating_tag and 'title' in rating_tag.attrs:
-                    try:
-                        details['avg_rating'] = float(rating_tag['title'].split("Weighted average of ")[1].split(" based")[0])
-                    except (IndexError, ValueError):
-                        pass
+        # get number of members watched and liked
+        stats_url = f"https://letterboxd.com/csi/film/{film_slug}/stats/"
+        stats_response = session.get(stats_url, timeout=10)
+        if stats_response.status_code == 200:
+            stats_soup = BeautifulSoup(stats_response.text, 'html.parser')
+            stats_text = stats_soup.get_text().split()
+            if len(stats_text) >= 3:
+                details['num_watched'] = parse_stat_number(stats_text[0])
+                details['num_liked'] = parse_stat_number(stats_text[2])
 
-            # get stats
-            stats_url = f"https://letterboxd.com/csi/film/{film_slug}/stats/"
-            stats_response = session.get(stats_url, timeout=10)
-            if stats_response.status_code == 200:
-                stats_soup = BeautifulSoup(stats_response.text, 'html.parser')
-                watched = stats_soup.find('a', class_='icon-watched')
-                liked = stats_soup.find('a', class_='icon-liked')
-                details['num_watched'] = get_digits(watched['title']) if watched and 'title' in watched.attrs else None
-                details['num_liked'] = get_digits(liked['title']) if liked and 'title' in liked.attrs else None
+        # get average rating
+        ratings_url = f"https://letterboxd.com/csi/film/{film_slug}/ratings-summary/"
+        ratings_response = session.get(ratings_url, timeout=10)
+        if ratings_response.status_code == 200:
+            ratings_soup = BeautifulSoup(ratings_response.text, 'html.parser')
+            ratings_text = ratings_soup.get_text()
+            match = re.search(r'(\d+\.\d+)\s+★', ratings_text)
+            if match:
+                average_rating = match.group(1)
+                details['avg_rating'] = float(average_rating)
 
-            # small delay between api calls
-            time.sleep(0.1 + random.random() * 0.5)
-        except Exception:
-            pass
+        # small delay between api calls
+        time.sleep(0.1 + random.random() * 0.5)
 
     except Exception as e:
+        print(f"Error processing {film_slug}: {str(e)}")
         return film_slug, details
 
     return film_slug, details
