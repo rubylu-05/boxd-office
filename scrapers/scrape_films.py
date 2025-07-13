@@ -104,8 +104,6 @@ def get_films(username):
         except Exception as e:
             print(f"Error on page {page}: {str(e)[:200]}")
             break
-
-    print(f"\nFound {len(films)} films. Starting detail scraping...\n")
     
     film_details = {}
     total_films = len(films)

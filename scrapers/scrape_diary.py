@@ -41,8 +41,8 @@ def get_diary_entries(username):
             film_slug = film_poster_div['data-film-slug'] if film_poster_div else None
 
             # film name
-            name_h3 = row.find('h3', class_='headline-3 prettify')
-            film_name = name_h3.find('a').get_text(strip=True) if name_h3 else None
+            name_h2 = row.find('h2', class_='name -primary prettify')
+            film_name = name_h2.find('a').get_text(strip=True) if name_h2 else None
 
             # date
             day_td = row.find('td', class_='td-day')
