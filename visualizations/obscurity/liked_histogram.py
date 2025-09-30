@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from utils import format_with_linebreaks, format_number, ORANGE, GRAY
 
 def plot_liked_histogram(films_df: pd.DataFrame):
-    df = films_df.dropna(subset=['num_liked'])
+    df = films_df.dropna(subset=['num_liked']).copy()
 
     counts, bin_edges = pd.cut(df['num_liked'], bins=40, retbins=True)
     bin_ranges = [

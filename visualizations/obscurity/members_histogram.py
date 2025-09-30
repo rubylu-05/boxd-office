@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from utils import format_with_linebreaks, format_number, BLUE, GRAY
 
 def plot_members_histogram(films_df: pd.DataFrame):
-    df = films_df.dropna(subset=['num_watched'])
+    df = films_df.dropna(subset=['num_watched']).copy()
     
     counts, bin_edges = pd.cut(df['num_watched'], bins=40, retbins=True)
     bin_ranges = [

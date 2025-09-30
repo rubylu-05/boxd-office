@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from utils import format_with_linebreaks, BLUE, GRAY
 
 def plot_avg_rating_distribution(films_df: pd.DataFrame):
-    df = films_df.dropna(subset=['avg_rating'])
+    df = films_df.dropna(subset=['avg_rating']).copy()
 
     counts, bin_edges = pd.cut(df['avg_rating'], bins=25, retbins=True)
     bin_ranges = [
